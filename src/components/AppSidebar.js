@@ -1,6 +1,5 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-
 import {
   CCloseButton,
   CSidebar,
@@ -9,11 +8,8 @@ import {
   CSidebarHeader,
   CSidebarToggler,
 } from '@coreui/react'
-
 import { AppSidebarNav } from './AppSidebarNav'
 import logo from '../assets/images/favicon.png'
-
-// sidebar nav config
 import navigation from '../_nav'
 
 const AppSidebar = () => {
