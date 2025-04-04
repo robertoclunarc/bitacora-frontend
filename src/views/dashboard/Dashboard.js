@@ -1,26 +1,129 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
-  CButton,
-  CButtonGroup,
-  CCard,
-  CCardBody,
-  CCardFooter,
-  CCol,
-  CProgress,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
+  CButton,  CButtonGroup,  CCard,  CCardBody,
+  CCardFooter,  CCardHeader,  CCardText,
+  CCardTitle,  CCol,  CRow,  CSpinner,
+  CBadge,  CTable,  CTableBody,  CTableDataCell,
+  CTableHead,  CTableHeaderCell,  CTableRow,  CProgress
 } from '@coreui/react'
-import { CChartLine, CChartDoughnut } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
-import { cilCloudDownload, cilChartPie } from '@coreui/icons'
+import { 
+  cilBell,   cilWarning, 
+  cilInfo,   cilCalendarCheck,  cilPeople
+} from '@coreui/icons'
+import { getCarteleraActive } from '../../services/cartelera.service'
+import { getBitacorasActive } from '../../services/bitocoras.services'
+import { getReunionesActive } from '../../services/reuniones.service'
 
 const Dashboard = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  const [carteleras, setCarteleras] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [actividad, setActividad] = useState([])
+  const [loadingActividad, setLoadingActividad] = useState(true)
+
+  useEffect(() => {
+    // Función para obtener carteleras
+    const fetchCarteleras = async () => {
+      try {
+        setLoading(true)
+        
+        const response = await getCarteleraActive(12, 0) // Obtener las primeras 12 carteleras
+        
+        if (response.data && response.data.carteleras) {
+          // Ordenar carteleras: DANGER primero, luego por fecha ascendente
+          const sortedCarteleras = response.data.carteleras.sort((a, b) => {
+            // Primero por tipo_info (DANGER > WARNING > INFO)
+            const typeOrder = { DANGER: 1, WARNING: 2, INFO: 3 }
+            const typeA = typeOrder[a.tipo_info] || 4
+            const typeB = typeOrder[b.tipo_info] || 4
+            
+            if (typeA !== typeB) {
+              return typeA - typeB
+            }
+            
+            // Luego por fecha de inicio ascendente
+            return new Date(a.fecha_inicio_publicacion) - new Date(b.fecha_inicio_publicacion)
+          })
+          
+          // Limitar a 12 carteleras
+          setCarteleras(sortedCarteleras.slice(0, 12))
+        }
+      } catch (err) {
+        console.error('Error al obtener carteleras:', err)
+        setError('No se pudieron cargar las carteleras. Por favor, intenta nuevamente.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    // Función para obtener actividad reciente
+    const fetchActividad = async () => {
+      try {
+        setLoadingActividad(true)
+        // Ejemplo: obtener las últimas 5 entradas de actividad (puedes ajustar según tus endpoints)
+        const [bitacorasRes, reunionesRes] = await Promise.all([
+          getBitacorasActive(3, 0),
+          getReunionesActive(3, 0)          
+        ])
+        
+        // Combinar y formatear datos de actividad
+        const bitacoras = bitacorasRes.data.bitacoras.map(b => ({
+          tipo: 'Bitácora',
+          descripcion: b.tema || b.descripcion.substring(0, 50) + '...',
+          fecha: new Date(b.fecha).toLocaleDateString(),
+          usuario: b.login
+        }))
+        
+        const reuniones = reunionesRes.data.reuniones.map(r => ({
+          tipo: 'Reunión',
+          descripcion: r.tema,
+          fecha: new Date(r.fecha_inicio).toLocaleDateString(),
+          usuario: r.login_registrado
+        }))
+        
+        // Combinar, ordenar por fecha y limitar a 5 elementos
+        const combinedActivity = [...bitacoras, ...reuniones]
+          .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+          .slice(0, 5)
+        
+        setActividad(combinedActivity)
+      } catch (err) {
+        console.error('Error al obtener actividad reciente:', err)
+      } finally {
+        setLoadingActividad(false)
+      }
+    }
+
+    fetchCarteleras()
+    fetchActividad()
+  }, [])
+
+  // Función para obtener el ícono según el tipo_info
+  const getIconByType = (type) => {
+    switch (type) {
+      case 'DANGER':
+        return <CIcon icon={cilWarning} className="text-danger" />
+      case 'WARNING':
+        return <CIcon icon={cilBell} className="text-warning" />
+      case 'INFO':
+      default:
+        return <CIcon icon={cilInfo} className="text-info" />
+    }
+  }
+
+  // Función para obtener el color de la tarjeta según el tipo_info
+  const getCardColorByType = (type) => {
+    switch (type) {
+      case 'DANGER':
+        return 'danger'
+      case 'WARNING':
+        return 'warning'
+      case 'INFO':
+      default:
+        return 'info'
+    }
+  }
 
   return (
     <>
@@ -29,18 +132,18 @@ const Dashboard = () => {
           <CRow>
             <CCol sm={5}>
               <h4 id="traffic" className="card-title mb-0">
-                Actividad del Sistema
+                Carteleras Informativas
               </h4>
-              <div className="small text-medium-emphasis">Enero - Julio 2023</div>
+              <div className="small text-medium-emphasis">Información relevante y actualizada</div>
             </CCol>
             <CCol sm={7} className="d-none d-md-block">
               <CButtonGroup className="float-end">
-                {['Día', 'Mes', 'Año'].map((value) => (
+                {['Todas', 'Importante', 'Normal'].map((value) => (
                   <CButton
                     color="outline-secondary"
                     key={value}
                     className="mx-0"
-                    active={value === 'Mes'}
+                    active={value === 'Todas'}
                   >
                     {value}
                   </CButton>
@@ -48,180 +151,166 @@ const Dashboard = () => {
               </CButtonGroup>
             </CCol>
           </CRow>
-          <CChartLine
-            style={{ height: '300px', marginTop: '40px' }}
-            data={{
-              labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'],
-              datasets: [
-                {
-                  label: 'Bitácoras',
-                  backgroundColor: 'rgba(220, 220, 220, 0.2)',
-                  borderColor: 'rgba(220, 220, 220, 1)',
-                  pointBackgroundColor: 'rgba(220, 220, 220, 1)',
-                  pointBorderColor: '#fff',
-                  data: [random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200)],
-                },
-                {
-                  label: 'Reuniones',
-                  backgroundColor: 'rgba(151, 187, 205, 0.2)',
-                  borderColor: 'rgba(151, 187, 205, 1)',
-                  pointBackgroundColor: 'rgba(151, 187, 205, 1)',
-                  pointBorderColor: '#fff',
-                  data: [random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200)],
-                },
-              ],
-            }}
-            options={{
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: true,
-                },
-              },
-              scales: {
-                x: {
-                  grid: {
-                    drawOnChartArea: false,
-                  },
-                },
-                y: {
-                  beginAtZero: true,
-                  max: 250,
-                },
-              },
-              elements: {
-                line: {
-                  tension: 0.4,
-                },
-                point: {
-                  radius: 0,
-                  hitRadius: 10,
-                  hoverRadius: 4,
-                  hoverBorderWidth: 3,
-                },
-              },
-            }}
-          />
+
+          {loading ? (
+            <div className="d-flex justify-content-center my-5">
+              <CSpinner color="primary" />
+            </div>
+          ) : error ? (
+            <div className="text-center text-danger my-5">
+              <p>{error}</p>
+              <CButton color="primary" onClick={() => window.location.reload()}>
+                Reintentar
+              </CButton>
+            </div>
+          ) : (
+            <CRow className="mt-4">
+              {carteleras.length === 0 ? (
+                <CCol className="text-center my-5">
+                  <p>No hay carteleras activas para mostrar.</p>
+                </CCol>
+              ) : (
+                carteleras.map((cartelera, index) => (
+                  <CCol sm={6} lg={3} key={cartelera.idcartelera || index} className="mb-4">
+                    <CCard 
+                      color={getCardColorByType(cartelera.tipo_info)} 
+                      textColor={cartelera.tipo_info === 'DANGER' ? 'white' : undefined}
+                      className="h-100"
+                    >
+                      <CCardHeader className="d-flex justify-content-between align-items-center">
+                        {getIconByType(cartelera.tipo_info)}
+                        <CBadge color={getCardColorByType(cartelera.tipo_info)} shape="rounded-pill">
+                          {cartelera.tipo_info || 'INFO'}
+                        </CBadge>
+                      </CCardHeader>
+                      <CCardBody>
+                        <CCardTitle>{cartelera.titulo || `Aviso #${cartelera.idcartelera}`}</CCardTitle>
+                        <CCardText>
+                          {cartelera.descripcion?.length > 80 
+                            ? cartelera.descripcion.substring(0, 80) + '...' 
+                            : cartelera.descripcion}
+                        </CCardText>
+                      </CCardBody>
+                      <CCardFooter className="text-medium-emphasis">
+                        <small>
+                          Válido hasta: {new Date(cartelera.fecha_fin_publicacion).toLocaleDateString()}
+                        </small>
+                      </CCardFooter>
+                    </CCard>
+                  </CCol>
+                ))
+              )}
+            </CRow>
+          )}
         </CCardBody>
-        <CCardFooter>
-          <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
-            <CCol className="mb-sm-2 mb-0">
-              <div className="text-medium-emphasis">Bitácoras Totales</div>
-              <div className="fw-semibold">1,123 (+ 22%)</div>
-              <CProgress thin className="mt-2" precision={1} color="success" value={40} />
-            </CCol>
-            <CCol className="mb-sm-2 mb-0">
-              <div className="text-medium-emphasis">Reuniones</div>
-              <div className="fw-semibold">450 (+ 15.4%)</div>
-              <CProgress thin className="mt-2" precision={1} color="info" value={20} />
-            </CCol>
-            <CCol className="mb-sm-2 mb-0">
-              <div className="text-medium-emphasis">Carteleras</div>
-              <div className="fw-semibold">87 (+ 5.4%)</div>
-              <CProgress thin className="mt-2" precision={1} color="warning" value={60} />
-            </CCol>
-            <CCol className="mb-sm-2 mb-0">
-              <div className="text-medium-emphasis">Force</div>
-              <div className="fw-semibold">728 (+ 8.2%)</div>
-              <CProgress thin className="mt-2" precision={1} color="danger" value={30} />
-            </CCol>
-            <CCol className="mb-sm-2 mb-0">
-              <div className="text-medium-emphasis">Equipos</div>
-              <div className="fw-semibold">284 (+ 3.2%)</div>
-              <CProgress thin className="mt-2" precision={1} color="primary" value={40} />
-            </CCol>
-          </CRow>
-        </CCardFooter>
       </CCard>
 
       <CRow>
-        <CCol xs={6}>
+        <CCol md={6}>
           <CCard className="mb-4">
+            <CCardHeader>
+              <strong>Actividad Reciente</strong>
+            </CCardHeader>
             <CCardBody>
-              <CRow>
-                <CCol sm={6}>
-                  <h4 id="traffic" className="card-title mb-0">
-                    Distribución por Áreas
-                  </h4>
-                  <div className="small text-medium-emphasis">Enero - Julio 2023</div>
-                </CCol>
-                <CCol sm={6} className="d-none d-md-block">
-                  <CButton color="primary" className="float-end">
-                    <CIcon icon={cilCloudDownload} />
-                  </CButton>
-                </CCol>
-              </CRow>
-              <CChartDoughnut
-                style={{ height: '300px', marginTop: '40px' }}
-                data={{
-                  labels: ['Producción', 'Mantenimiento', 'Calidad', 'Administración', 'Seguridad'],
-                  datasets: [
-                    {
-                      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-                      data: [random(50, 200), random(50, 200), random(50, 200), random(50, 200), random(50, 200)],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      position: 'bottom',
-                    }
-                  },
-                  maintainAspectRatio: false,
-                }}
-              />
+              {loadingActividad ? (
+                <div className="text-center my-3">
+                  <CSpinner size="sm" />
+                </div>
+              ) : (
+                <CTable hover responsive>
+                  <CTableHead>
+                    <CTableRow>
+                      <CTableHeaderCell scope="col">Tipo</CTableHeaderCell>
+                      <CTableHeaderCell scope="col">Descripción</CTableHeaderCell>
+                      <CTableHeaderCell scope="col">Fecha</CTableHeaderCell>
+                      <CTableHeaderCell scope="col">Usuario</CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {actividad.length === 0 ? (
+                      <CTableRow>
+                        <CTableDataCell colSpan={4} className="text-center">
+                          No hay actividad reciente.
+                        </CTableDataCell>
+                      </CTableRow>
+                    ) : (
+                      actividad.map((item, index) => (
+                        <CTableRow key={index}>
+                          <CTableDataCell>
+                            <CBadge color={item.tipo === 'Bitácora' ? 'info' : 'primary'}>
+                              {item.tipo}
+                            </CBadge>
+                          </CTableDataCell>
+                          <CTableDataCell>{item.descripcion}</CTableDataCell>
+                          <CTableDataCell>{item.fecha}</CTableDataCell>
+                          <CTableDataCell>{item.usuario}</CTableDataCell>
+                        </CTableRow>
+                      ))
+                    )}
+                  </CTableBody>
+                </CTable>
+              )}
             </CCardBody>
           </CCard>
         </CCol>
 
-        <CCol xs={6}>
+        <CCol md={6}>
           <CCard className="mb-4">
+            <CCardHeader>
+              <strong>Resumen del Sistema</strong>
+            </CCardHeader>
             <CCardBody>
-              <h4 className="card-title mb-0">Actividad reciente</h4>
-              <div className="small text-medium-emphasis mb-3">Últimos registros</div>
-              <CTable hover responsive>
-                <CTableHead>
-                  <CTableRow>
-                    <CTableHeaderCell scope="col">Tipo</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Descripción</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Fecha</CTableHeaderCell>
-                    <CTableHeaderCell scope="col">Usuario</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  <CTableRow>
-                    <CTableDataCell>Bitácora</CTableDataCell>
-                    <CTableDataCell>Mantenimiento preventivo realizado</CTableDataCell>
-                    <CTableDataCell>10/07/2023</CTableDataCell>
-                    <CTableDataCell>jperez</CTableDataCell>
-                  </CTableRow>
-                  <CTableRow>
-                    <CTableDataCell>Reunión</CTableDataCell>
-                    <CTableDataCell>Planificación semanal</CTableDataCell>
-                    <CTableDataCell>09/07/2023</CTableDataCell>
-                    <CTableDataCell>mgomez</CTableDataCell>
-                  </CTableRow>
-                  <CTableRow>
-                    <CTableDataCell>Force</CTableDataCell>
-                    <CTableDataCell>Activación de sistema</CTableDataCell>
-                    <CTableDataCell>08/07/2023</CTableDataCell>
-                    <CTableDataCell>alopez</CTableDataCell>
-                  </CTableRow>
-                  <CTableRow>
-                    <CTableDataCell>Bitácora</CTableDataCell>
-                    <CTableDataCell>Reporte de incidencia</CTableDataCell>
-                    <CTableDataCell>08/07/2023</CTableDataCell>
-                    <CTableDataCell>rrodriguez</CTableDataCell>
-                  </CTableRow>
-                  <CTableRow>
-                    <CTableDataCell>Cartelera</CTableDataCell>
-                    <CTableDataCell>Comunicado de seguridad</CTableDataCell>
-                    <CTableDataCell>07/07/2023</CTableDataCell>
-                    <CTableDataCell>mgomez</CTableDataCell>
-                  </CTableRow>
-                </CTableBody>
-              </CTable>
+              <CRow>
+                <CCol xs={6} md={6} className="mb-3">
+                  <div className="border-start border-start-4 border-start-info py-1 px-3">
+                    <div className="text-medium-emphasis small">Bitácoras</div>
+                    <div className="fs-5 fw-semibold">1,123</div>
+                  </div>
+                </CCol>
+                <CCol xs={6} md={6} className="mb-3">
+                  <div className="border-start border-start-4 border-start-danger py-1 px-3">
+                    <div className="text-medium-emphasis small">Reuniones</div>
+                    <div className="fs-5 fw-semibold">450</div>
+                  </div>
+                </CCol>
+                <CCol xs={6} md={6} className="mb-3">
+                  <div className="border-start border-start-4 border-start-warning py-1 px-3">
+                    <div className="text-medium-emphasis small">Carteleras</div>
+                    <div className="fs-5 fw-semibold">87</div>
+                  </div>
+                </CCol>
+                <CCol xs={6} md={6} className="mb-3">
+                  <div className="border-start border-start-4 border-start-success py-1 px-3">
+                    <div className="text-medium-emphasis small">Usuarios</div>
+                    <div className="fs-5 fw-semibold">25</div>
+                  </div>
+                </CCol>
+              </CRow>
+
+              <hr className="mt-0 mb-4" />
+
+              <div className="mb-3 progress-group">
+                <div className="progress-group-header">
+                  <CIcon className="me-2" icon={cilCalendarCheck} />
+                  <span>Reuniones Pendientes</span>
+                  <span className="ms-auto fw-semibold">12</span>
+                  <span className="text-medium-emphasis small">(80%)</span>
+                </div>
+                <div className="progress-group-bars">
+                  <CProgress thin color="success" value={80} />
+                </div>
+              </div>
+              <div className="mb-3 progress-group">
+                <div className="progress-group-header">
+                  <CIcon className="me-2" icon={cilPeople} />
+                  <span>Actividad de Usuarios</span>
+                  <span className="ms-auto fw-semibold">15</span>
+                  <span className="text-medium-emphasis small">(60%)</span>
+                </div>
+                <div className="progress-group-bars">
+                  <CProgress thin color="info" value={60} />
+                </div>
+              </div>
             </CCardBody>
           </CCard>
         </CCol>

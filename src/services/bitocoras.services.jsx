@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-const API_URL = `${process.env.REACT_APP_API_URL}/menus`;
+const API_URL = `${process.env.REACT_APP_API_URL}/bitacoras`;
 
-export const getMenus = async () => {
+export const getBitacorasActive = async (limit, offset) => {
   // Obtener el token del localStorage (asumiendo que usas JWT)
   /*
   const token = localStorage.getItem('token')
@@ -22,10 +22,10 @@ export const getMenus = async () => {
   }
   
   try {    
-    const response = await axios.get(`${API_URL}/tree/matlux`, config);    
+    const response = await axios.get(`${API_URL}/?limit=${limit}&offset=${offset}`, config);    
     return response.data;
   } catch (error) {
-    console.error('Error al obtener menús:', error)
+    console.error('Error al obtener Bitacoras:', error)
     throw error
   }
 }

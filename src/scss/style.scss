@@ -15,6 +15,13 @@ body {
   background-color: var(--cui-tertiary-bg);
 }
 
+.wrapper {
+  width: 100%;
+  padding-inline: var(--cui-sidebar-occupy-start, 0) var(--cui-sidebar-occupy-end, 0);
+  will-change: auto;
+  transition: padding .15s;
+}
+
 // Sidebar customization
 .sidebar {
   background-color: #3c4b64;
