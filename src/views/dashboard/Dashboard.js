@@ -66,16 +66,16 @@ const Dashboard = () => {
           getBitacorasActive(3, 0),
           getReunionesActive(3, 0)          
         ])
-        
+        console.log('Bitácoras:', bitacorasRes)
         // Combinar y formatear datos de actividad
-        const bitacoras = bitacorasRes.data.bitacoras.map(b => ({
+        const bitacoras = bitacorasRes.bitacoras.map(b => ({
           tipo: 'Bitácora',
           descripcion: b.tema || b.descripcion.substring(0, 50) + '...',
           fecha: new Date(b.fecha).toLocaleDateString(),
           usuario: b.login
         }))
         
-        const reuniones = reunionesRes.data.reuniones.map(r => ({
+        const reuniones = reunionesRes.reuniones.map(r => ({
           tipo: 'Reunión',
           descripcion: r.tema,
           fecha: new Date(r.fecha_inicio).toLocaleDateString(),
