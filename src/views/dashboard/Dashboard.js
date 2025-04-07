@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react'
 import {
   CButton,  CButtonGroup,  CCard,  CCardBody,
   CCardFooter,  CCardHeader,  CCardText,
-  CCardTitle,  CCol,  CRow,  CSpinner,
+  CCol,  CRow,  CSpinner,
   CBadge,  CTable,  CTableBody,  CTableDataCell,
-  CTableHead,  CTableHeaderCell,  CTableRow,  CProgress
+  CTableHead,  CTableHeaderCell,  CTableRow,  CProgress,
+  CModal, CModalBody, CModalHeader, CModalTitle, CModalFooter
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { 
-  cilBell,   cilWarning, 
+  cilBell,   cilWarning, cilUser,  cilClock, 
   cilInfo,   cilCalendarCheck,  cilPeople
 } from '@coreui/icons'
 import { getCarteleraActive } from '../../services/cartelera.service'
@@ -17,10 +18,20 @@ import { getReunionesActive } from '../../services/reuniones.service'
 
 const Dashboard = () => {
   const [carteleras, setCarteleras] = useState([])
+  const [cartelerasAll, setCartelerasAll] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [actividad, setActividad] = useState([])
   const [loadingActividad, setLoadingActividad] = useState(true)
+  const [totalBitacoras, setTotalBitacoras] = useState(0)
+  const [totalReuniones, setTotalReuniones] = useState(0)
+  const [totalCarteletas, setTotalCarteleras] = useState(0)
+
+  // Estados para el modal
+  const [selectedCartelera, setSelectedCartelera] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+
+  const [filtroTipo, setFiltroTipo] = useState('Todas');
 
   useEffect(() => {
     // Función para obtener carteleras
@@ -30,9 +41,9 @@ const Dashboard = () => {
         
         const response = await getCarteleraActive(12, 0) // Obtener las primeras 12 carteleras
         
-        if (response.data && response.data.carteleras) {
+        if (response && response.carteleras) {
           // Ordenar carteleras: DANGER primero, luego por fecha ascendente
-          const sortedCarteleras = response.data.carteleras.sort((a, b) => {
+          const sortedCarteleras = response.carteleras.sort((a, b) => {
             // Primero por tipo_info (DANGER > WARNING > INFO)
             const typeOrder = { DANGER: 1, WARNING: 2, INFO: 3 }
             const typeA = typeOrder[a.tipo_info] || 4
@@ -48,6 +59,8 @@ const Dashboard = () => {
           
           // Limitar a 12 carteleras
           setCarteleras(sortedCarteleras.slice(0, 12))
+          setCartelerasAll(sortedCarteleras.slice(0, 12))
+          setTotalCarteleras(cartelerasAll.length || 0)
         }
       } catch (err) {
         console.error('Error al obtener carteleras:', err)
@@ -66,7 +79,7 @@ const Dashboard = () => {
           getBitacorasActive(3, 0),
           getReunionesActive(3, 0)          
         ])
-        console.log('Bitácoras:', bitacorasRes)
+        
         // Combinar y formatear datos de actividad
         const bitacoras = bitacorasRes.bitacoras.map(b => ({
           tipo: 'Bitácora',
@@ -74,6 +87,8 @@ const Dashboard = () => {
           fecha: new Date(b.fecha).toLocaleDateString(),
           usuario: b.login
         }))
+
+        setTotalBitacoras(bitacoras.length() || 0)
         
         const reuniones = reunionesRes.reuniones.map(r => ({
           tipo: 'Reunión',
@@ -81,6 +96,8 @@ const Dashboard = () => {
           fecha: new Date(r.fecha_inicio).toLocaleDateString(),
           usuario: r.login_registrado
         }))
+
+        setTotalReuniones(reuniones.length() || 0)
         
         // Combinar, ordenar por fecha y limitar a 5 elementos
         const combinedActivity = [...bitacoras, ...reuniones]
@@ -125,6 +142,33 @@ const Dashboard = () => {
     }
   }
 
+  // Función para abrir el modal con la información de la cartelera
+  const handleCarteleraClick = (cartelera) => {
+    setSelectedCartelera(cartelera)
+    setShowModal(true)
+  }
+
+  const handleFiltraTipo = (tipo) => {
+    let selectOpcion
+    switch (tipo) {
+      case 'Danger':
+        selectOpcion = 'DANGER';
+        break;
+      case 'Warning':
+        selectOpcion = 'WARNING';
+        break;
+      case 'Info':
+        selectOpcion = 'INFO';
+        break;
+      default:
+        selectOpcion = 'Todas';
+        break;
+    }
+    setFiltroTipo(tipo);    
+    const datosFiltrados = selectOpcion === 'Todas'  ? cartelerasAll  : cartelerasAll.filter(item => item.tipo_info === selectOpcion);    
+    setCarteleras(datosFiltrados);
+  }
+
   return (
     <>
       <CCard className="mb-4">
@@ -138,12 +182,13 @@ const Dashboard = () => {
             </CCol>
             <CCol sm={7} className="d-none d-md-block">
               <CButtonGroup className="float-end">
-                {['Todas', 'Importante', 'Normal'].map((value) => (
+                {['Todas', 'Danger', 'Warning', 'Info'].map((value) => (
                   <CButton
                     color="outline-secondary"
                     key={value}
                     className="mx-0"
-                    active={value === 'Todas'}
+                    active={value === filtroTipo}
+                    onClick={() => handleFiltraTipo(value)}
                   >
                     {value}
                   </CButton>
@@ -175,19 +220,20 @@ const Dashboard = () => {
                     <CCard 
                       color={getCardColorByType(cartelera.tipo_info)} 
                       textColor={cartelera.tipo_info === 'DANGER' ? 'white' : undefined}
-                      className="h-100"
+                      className="h-100 cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleCarteleraClick(cartelera)}
                     >
                       <CCardHeader className="d-flex justify-content-between align-items-center">
                         {getIconByType(cartelera.tipo_info)}
                         <CBadge color={getCardColorByType(cartelera.tipo_info)} shape="rounded-pill">
-                          {cartelera.tipo_info || 'INFO'}
+                          {cartelera.nombrearea || 'INFO'}
                         </CBadge>
                       </CCardHeader>
-                      <CCardBody>
-                        <CCardTitle>{cartelera.titulo || `Aviso #${cartelera.idcartelera}`}</CCardTitle>
+                      <CCardBody>                        
                         <CCardText>
-                          {cartelera.descripcion?.length > 80 
-                            ? cartelera.descripcion.substring(0, 80) + '...' 
+                          {cartelera.descripcion?.length > 120 
+                            ? cartelera.descripcion.substring(0, 120) + '...' 
                             : cartelera.descripcion}
                         </CCardText>
                       </CCardBody>
@@ -264,19 +310,19 @@ const Dashboard = () => {
                 <CCol xs={6} md={6} className="mb-3">
                   <div className="border-start border-start-4 border-start-info py-1 px-3">
                     <div className="text-medium-emphasis small">Bitácoras</div>
-                    <div className="fs-5 fw-semibold">1,123</div>
+                    <div className="fs-5 fw-semibold">{ totalBitacoras }</div>
                   </div>
                 </CCol>
                 <CCol xs={6} md={6} className="mb-3">
                   <div className="border-start border-start-4 border-start-danger py-1 px-3">
                     <div className="text-medium-emphasis small">Reuniones</div>
-                    <div className="fs-5 fw-semibold">450</div>
+                    <div className="fs-5 fw-semibold">{ totalReuniones }</div>
                   </div>
                 </CCol>
                 <CCol xs={6} md={6} className="mb-3">
                   <div className="border-start border-start-4 border-start-warning py-1 px-3">
                     <div className="text-medium-emphasis small">Carteleras</div>
-                    <div className="fs-5 fw-semibold">87</div>
+                    <div className="fs-5 fw-semibold">{totalCarteletas}</div>
                   </div>
                 </CCol>
                 <CCol xs={6} md={6} className="mb-3">
@@ -315,6 +361,76 @@ const Dashboard = () => {
           </CCard>
         </CCol>
       </CRow>
+      {/* Modal de detalle de cartelera */}
+      <CModal 
+        visible={showModal} 
+        onClose={() => setShowModal(false)}
+        size="lg"
+        backdrop="static"
+        alignment="center"
+      >
+        {selectedCartelera && (
+          <>
+            <CModalHeader 
+              className={`bg-${getCardColorByType(selectedCartelera.tipo_info)} ${selectedCartelera.tipo_info === 'DANGER' ? 'text-white' : ''}`}
+            >
+              <CModalTitle>
+                {getIconByType(selectedCartelera.tipo_info)}
+                <span className="ms-2">
+                  {selectedCartelera.tipo_info}
+                </span>
+              </CModalTitle>
+            </CModalHeader>
+            <CModalBody>
+              <div className="mb-3">                
+                <p className="mb-4" style={{ whiteSpace: 'pre-line' }}>
+                  {selectedCartelera.descripcion}
+                </p>
+                
+                <hr/>
+                
+                <div className="row mt-4">
+                  <div className="col-md-6">
+                    <h6 className="mb-2 d-flex align-items-center">
+                      <CIcon icon={cilClock} className="me-2" />
+                      Periodo de vigencia:
+                    </h6>
+                    <p>
+                      <strong>Desde:</strong> {new Date(selectedCartelera.fecha_inicio_publicacion).toLocaleDateString()} <br/>
+                      <strong>Hasta:</strong> {new Date(selectedCartelera.fecha_fin_publicacion).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="col-md-6">
+                    <h6 className="mb-2 d-flex align-items-center">
+                      <CIcon icon={cilUser} className="me-2" />
+                      Información de registro:
+                    </h6>
+                    <p>
+                      <strong>Usuario:</strong> {selectedCartelera.login_registrado} <br/>
+                      <strong>Fecha:</strong> {selectedCartelera.fecha_registrado ? new Date(selectedCartelera.fecha_registrado).toLocaleString() : 'N/A'}<br/>
+                      <strong>{selectedCartelera.publico === 1 ? "Publico" : 'Privado'}</strong> 
+                    </p>
+                  </div>
+                </div>
+                
+                {selectedCartelera.fkarea && (
+                  <div className="mt-2">
+                    <strong>Área:</strong> {selectedCartelera.nombrearea}
+                  </div>
+                )}
+              </div>
+            </CModalBody>
+            <CModalFooter className={`bg-${getCardColorByType(selectedCartelera.tipo_info)} opacity-75 ${selectedCartelera.tipo_info === 'DANGER' ? 'text-white' : ''}`}>
+              <CButton 
+                color={selectedCartelera.tipo_info === 'DANGER' ? 'light' : getCardColorByType(selectedCartelera.tipo_info)} 
+                onClick={() => setShowModal(false)}
+              >
+                Cerrar
+              </CButton>
+            </CModalFooter>
+          </>
+        )}
+      </CModal>
     </>
   )
 }
