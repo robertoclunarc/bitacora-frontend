@@ -91,10 +91,19 @@ const processMenuTree = async (menuData) => {
   return resultItems;
 };
 
-const DynamicSidebarNav = async () => {  
-	try {	
+const DynamicSidebarNav = async () => {
+  
+	try {
+    const token = localStorage.getItem('token')
+    const storedUser = localStorage.getItem('user')
+    console.log("Token:", token)
+    console.log("Stored User:", storedUser)
+    if (!token || !storedUser) {
+      
+      return [];
+    }
 		// Aquí hacemos la petición al backend para obtener el menú
-		const response = await getMenus();		
+		const response = await getMenus(token);		
 		// Transformamos el JSON a la estructura de menú de CoreUI
 		const menuItems = await processMenuTree(response);	
 		return menuItems; 

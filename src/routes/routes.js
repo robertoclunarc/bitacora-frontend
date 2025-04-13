@@ -1,6 +1,7 @@
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('../views/dashboard/Dashboard'))
+const PerfilUsuario = React.lazy(() => import('../views/perfil/PerfilUsuario'))
 /*
 // Areas
 const Areas = React.lazy(() => import('../views/configuracion/areas/Areas'))
@@ -35,6 +36,7 @@ const SenalesForce = React.lazy(() => import('../views/force/senales/SenalesForc
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/perfil', name: 'Perfil de Usuario', element: PerfilUsuario },
   /*
   // Configuración
   { path: '/configuracion/areas', name: 'Áreas', element: Areas },

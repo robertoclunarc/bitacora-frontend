@@ -1,5 +1,5 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -14,13 +14,153 @@ import {
   CDropdownToggle,
   CDropdownMenu,
   CDropdownItem,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CButton,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CInputGroup,
+  CInputGroupText,
+  CFormFeedback,
+  CSpinner,
+  CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilBell, cilEnvelopeOpen, cilList, cilMenu, cilAccountLogout, cilUser, cilSettings } from '@coreui/icons'
+import { cilMenu, cilAccountLogout, cilUser, cilLockLocked, cilUser as cilUserIcon } from '@coreui/icons'
+import usuarioDesconocido from '../assets/images/desconocido.png'
+
+import { logIn } from '../services/usuarios.service'
+
+// URL de imágenes
+const IMAGES_URL = process.env.REACT_APP_URL_IMAGEN || 'http://servidor-imagenes.com/'
 
 const AppHeader = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation() // Obtener la ubicación actual
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  
+  // Estados para autenticación
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userData, setUserData] = useState(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [pageTitle, setPageTitle] = useState('Dashboard') // Estado para el título de la página
+  
+  // Estados para el formulario de login
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [validated, setValidated] = useState(false)
+
+  // Obtener el título de la página actual basado en la ruta
+  useEffect(() => {
+    // Mapeo simple de rutas a títulos
+    const routeTitles = {
+      '/dashboard': 'Dashboard',
+      '/perfil': 'Perfil Usuario',
+      '/bitacoras': 'Bitácoras',
+      '/reuniones': 'Reuniones',
+      '/carteleras': 'Carteleras',
+      // Añadir más mapeos según sea necesario
+    }
+    
+    // Actualizar el título según la ruta actual
+    const path = location.pathname
+    setPageTitle(routeTitles[path] || 'Dashboard') // Usar Dashboard como valor por defecto
+  }, [location])
+
+  // Verificar si el usuario ya está autenticado al cargar el componente
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    
+    if (token && user) {
+      try {
+        setUserData(JSON.parse(user))
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        handleLogout() // Limpiar datos inválidos
+      }
+    }
+  }, [])
+
+  // Manejar cierre de sesión
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setIsAuthenticated(false)
+    setUserData(null)
+    // Opcional: redireccionar al dashboard
+    navigate('/dashboard')
+  }
+  
+  // Manejar clic en "Abrir Sesión"
+  const handleLoginClick = () => {
+    setShowLoginModal(true)
+    setLoginError('')
+    setUsername('')
+    setPassword('')
+    setValidated(false)
+  }
+  
+  // Función para obtener la URL de la imagen del usuario
+  const getUserImageUrl = () => {
+    if (isAuthenticated && userData && userData.trabajador) {
+      return `${IMAGES_URL}/${userData.trabajador}`
+    }
+    return usuarioDesconocido
+  }
+  
+  // Manejar envío del formulario de login
+  const handleLoginSubmit = async (event) => {
+    const form = event.currentTarget
+    event.preventDefault()
+    
+    // Validar formulario
+    if (form.checkValidity() === false) {
+      event.stopPropagation()
+      setValidated(true)
+      return
+    }
+    
+    setValidated(true)
+    setLoading(true)
+    setLoginError('')
+    
+    try {
+      const response = await logIn(username, password)
+      
+      if (response && response.token) {
+        // Guardar token y datos de usuario
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('user', JSON.stringify(response.user))
+        
+        // Actualizar estado
+        setIsAuthenticated(true)
+        setUserData(response.user)
+        
+        // Cerrar modal
+        setShowLoginModal(false)
+      } else {
+        setLoginError('Respuesta inválida del servidor')
+      }
+    } catch (error) {
+      console.error('Error login:', error)
+      if (error.response && error.response.data && error.response.data.message) {
+        setLoginError(error.response.data.message)
+      } else {
+        setLoginError('Error al iniciar sesión. Intente nuevamente.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <CHeader position="sticky" className="mb-4">
@@ -41,49 +181,58 @@ const AppHeader = () => {
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">Bitácoras</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Reuniones</CNavLink>
-          </CNavItem>
-        </CHeaderNav>
-        <CHeaderNav>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
+            <CNavLink to="/bitacoras" component={NavLink}>
+              Bitácoras
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilList} size="lg" />
+            <CNavLink to="/reuniones" component={NavLink}>
+              Reuniones
             </CNavLink>
           </CNavItem>
-          
-        </CHeaderNav>
+        </CHeaderNav>        
         <CHeaderNav className="ms-3">
+          {/* Mostrar el nombre del usuario cuando está autenticado */}
+          {isAuthenticated && userData && (
+            <div className="d-none d-md-flex align-items-center me-2 text-dark">
+              <span className="fw-semibold">{userData.nombres}</span>
+            </div>
+          )}
           <CDropdown variant="nav-item">
             <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
               <div className="avatar avatar-md">
                 <img
                   className="avatar-img"
-                  src="../assets/images/desconocido.png"
-                  alt="Usuario"
+                  src={getUserImageUrl()}
+                  alt={isAuthenticated ? userData?.nombres || 'Usuario' : 'Usuario no autenticado'}
+                  title={isAuthenticated ? userData?.nombres || 'Usuario' : 'Usuario no autenticado'}
+                  onError={(e) => {
+                    // Si hay error al cargar la imagen, usar la imagen por defecto
+                    e.target.src = usuarioDesconocido
+                  }}
                 />
               </div>
             </CDropdownToggle>
             <CDropdownMenu className="pt-0" placement="bottom-end">
-              <CDropdownItem href="#">
-                <CIcon icon={cilUser} className="me-2" />
-                Perfil
-              </CDropdownItem>
-              <CDropdownItem href="#">
-                <CIcon icon={cilSettings} className="me-2" />
-                Configuración
-              </CDropdownItem>
-              <CDropdownItem href="#">
-                <CIcon icon={cilAccountLogout} className="me-2" />
-                Cerrar sesión
-              </CDropdownItem>
+              {isAuthenticated ? (
+                // Opciones para usuario autenticado
+                <>
+                  <CDropdownItem onClick={() => navigate('/perfil')}>
+                    <CIcon icon={cilUser} className="me-2" />
+                    Perfil
+                  </CDropdownItem>
+                  <CDropdownItem onClick={handleLogout}>
+                    <CIcon icon={cilAccountLogout} className="me-2" />
+                    Cerrar Sesión
+                  </CDropdownItem>
+                </>
+              ) : (
+                // Opción para usuario no autenticado
+                <CDropdownItem onClick={handleLoginClick}>
+                  <CIcon icon={cilUser} className="me-2" />
+                  Abrir Sesión
+                </CDropdownItem>
+              )}
             </CDropdownMenu>
           </CDropdown>
         </CHeaderNav>
@@ -91,10 +240,91 @@ const AppHeader = () => {
       <CHeaderDivider />
       <CContainer fluid>
         <div className="breadcrumb-wrapper">
-          {/* Breadcrumb logic would go here */}
-          <h4 className="text-primary mb-0">Dashboard</h4>
+          {/* Título dinámico basado en la ruta actual */}
+          <h4 className="text-primary mb-0">{pageTitle}</h4>
         </div>
       </CContainer>
+      
+      {/* Modal de Inicio de Sesión */}
+      <CModal 
+        visible={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+        backdrop="static"
+        alignment="center"
+      >
+        <CModalHeader>
+          <CModalTitle>Iniciar Sesión</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {loginError && (
+            <CAlert color="danger" className="mb-3">
+              {loginError}
+            </CAlert>
+          )}
+          
+          <CForm 
+            className="needs-validation"
+            noValidate
+            validated={validated}
+            onSubmit={handleLoginSubmit}
+          >
+            <div className="mb-3">
+              <CFormLabel htmlFor="username">Nombre de Usuario</CFormLabel>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>
+                  <CIcon icon={cilUserIcon} />
+                </CInputGroupText>
+                <CFormInput
+                  type="text"
+                  id="username"
+                  placeholder="Usuario"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                  autoFocus
+                />
+                <CFormFeedback invalid>Por favor ingrese su nombre de usuario.</CFormFeedback>
+              </CInputGroup>
+            </div>
+            
+            <div className="mb-4">
+              <CFormLabel htmlFor="password">Contraseña</CFormLabel>
+              <CInputGroup className="has-validation">
+                <CInputGroupText>
+                  <CIcon icon={cilLockLocked} />
+                </CInputGroupText>
+                <CFormInput
+                  type="password"
+                  id="password"
+                  placeholder="Contraseña"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+                <CFormFeedback invalid>Por favor ingrese su contraseña.</CFormFeedback>
+              </CInputGroup>
+            </div>
+            
+            <div className="d-grid gap-2">
+              <CButton color="primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <CSpinner size="sm" className="me-2" />
+                    Iniciando sesión...
+                  </>
+                ) : 'Iniciar Sesión'}
+              </CButton>
+            </div>
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowLoginModal(false)}>
+            Cancelar
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </CHeader>
   )
 }

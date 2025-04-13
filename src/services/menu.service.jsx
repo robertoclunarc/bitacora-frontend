@@ -2,27 +2,16 @@ import axios from 'axios'
 
 const API_URL = `${process.env.REACT_APP_API_URL}/menus`;
 
-export const getMenus = async () => {
-  // Obtener el token del localStorage (asumiendo que usas JWT)
-  /*
-  const token = localStorage.getItem('token')
-  
-  if (!token) {
-    throw new Error('No hay token de autenticación')
-  }
-  */
+export const getMenus = async (token) => {  
   // Configurar headers con el token
   const config = {
-    headers: 
-    {'Content-Type': 'application/json'}
-    /*
-    {
+    headers: {
       'Authorization': `Bearer ${token}`
-    }*/
+    }
   }
   
   try {    
-    const response = await axios.get(`${API_URL}/tree/matlux`, config);    
+    const response = await axios.get(`${API_URL}/tree`, config);
     return response.data;
   } catch (error) {
     console.error('Error al obtener menús:', error)

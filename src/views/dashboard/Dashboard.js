@@ -88,7 +88,7 @@ const Dashboard = () => {
           usuario: b.login
         }))
 
-        setTotalBitacoras(bitacoras.length() || 0)
+        setTotalBitacoras(bitacoras.length || 0)
         
         const reuniones = reunionesRes.reuniones.map(r => ({
           tipo: 'Reunión',
@@ -97,7 +97,7 @@ const Dashboard = () => {
           usuario: r.login_registrado
         }))
 
-        setTotalReuniones(reuniones.length() || 0)
+        setTotalReuniones(reuniones.length || 0)
         
         // Combinar, ordenar por fecha y limitar a 5 elementos
         const combinedActivity = [...bitacoras, ...reuniones]
@@ -176,7 +176,7 @@ const Dashboard = () => {
           <CRow>
             <CCol sm={5}>
               <h4 id="traffic" className="card-title mb-0">
-                Carteleras Informativas
+                Cartelera Informativa
               </h4>
               <div className="small text-medium-emphasis">Información relevante y actualizada</div>
             </CCol>
