@@ -81,21 +81,36 @@ const AppHeader = () => {
     
     if (token && user) {
       try {
-        setUserData(JSON.parse(user))
+        const userData = JSON.parse(user)
+        // Actualizar estado local
+        setUserData(userData)
         setIsAuthenticated(true)
+        // Actualizar el store global
+        dispatch({ 
+          type: 'LOGIN_SUCCESS', 
+          userData: userData 
+        })
       } catch (error) {
         console.error('Error parsing user data:', error)
         handleLogout() // Limpiar datos inválidos
       }
     }
-  }, [])
+    else {
+      // Si no hay datos de autenticación, asegurar que el menú muestre solo ítems públicos
+      dispatch({ type: 'LOGOUT' })
+    }
+  }, [dispatch])
 
   // Manejar cierre de sesión
   const handleLogout = () => {
+    // Eliminar los datos de autenticación del almacenamiento local
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    // Actualizar el estado local
     setIsAuthenticated(false)
     setUserData(null)
+    // Actualizar el store global - esto actualizará los ítems del sidebar
+    dispatch({ type: 'LOGOUT' })
     // Opcional: redireccionar al dashboard
     navigate('/dashboard')
   }
@@ -138,12 +153,20 @@ const AppHeader = () => {
       
       if (response && response.token) {
         // Guardar token y datos de usuario
+        const userData = response.user
         localStorage.setItem('token', response.token)
-        localStorage.setItem('user', JSON.stringify(response.user))
+        localStorage.setItem('user', JSON.stringify(userData))
         
         // Actualizar estado
         setIsAuthenticated(true)
-        setUserData(response.user)
+        setUserData(userData)
+
+        // Actualizar store global con datos de usuario y ítems de menú
+        dispatch({ 
+          type: 'LOGIN_SUCCESS', 
+          userData: userData
+          // navItems se calculará automáticamente en el reducer
+        })
         
         // Cerrar modal
         setShowLoginModal(false)
