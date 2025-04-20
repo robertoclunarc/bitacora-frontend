@@ -3,7 +3,6 @@ import navigation from './_nav'
 import CIcon from '@coreui/icons-react';
 const { CNavItem } = require('@coreui/react')
 
-
 const initialState = {
   sidebarShow: true,
   sidebarUnfoldable: false,
@@ -44,7 +43,10 @@ const getNavItems = (isAuthenticated, userData) => {
   } = require('@coreui/icons')
 
   // Si no está autenticado, solo devolver ítems públicos
-  if (!isAuthenticated || !userData) {
+  console.log('isAuthenticated', isAuthenticated)
+  console.log('userData', userData)
+  console.log('navigation', navigation)
+  if (!isAuthenticated || !userData || navigation.length === 0) {
     const publicItems = [
       {
         component: CNavItem,

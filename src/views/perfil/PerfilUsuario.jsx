@@ -145,10 +145,10 @@ const PerfilUsuario = () => {
       <CCol xs={12}>
         <CCard className="mb-4">
           <CCardHeader>
-            <h4>
+            <h5>
               <CIcon icon={cilUser} className="me-2" />
-              Perfil de Usuario
-            </h4>
+              Datos del Usuario
+            </h5>
           </CCardHeader>
           <CCardBody>
             {loading ? (

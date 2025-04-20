@@ -12,6 +12,11 @@ import DefaultLayout from './layouts/DefaultLayout';
 const Register = React.lazy(() => import('./views/pages/register/Register'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));*/
+// Auth Components
+//import AdminRoute from './components/auth/AdminRoute';
+
+// Admin Pages
+//const Usuarios = React.lazy(() => import('./views/configuracion/usuarios'));
 
 const loading = (
   <div className="pt-3 text-center">
@@ -28,6 +33,10 @@ function App() {
           {/*<Route exact path="/register" name="Register Page" element={<Register />} />*/}
           {/*<Route exact path="/404" name="Page 404" element={<Page404 />} />*/}
           {/*<Route exact path="/500" name="Page 500" element={<Page500 />} />*/}
+          
+          {/* Rutas protegidas para administradores */}
+          
+
           <Route path="*" name="Home" element={<DefaultLayout />} />
         </Routes>
       </Suspense>

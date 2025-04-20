@@ -96,8 +96,7 @@ const DynamicSidebarNav = async () => {
 	try {
     const token = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
-    console.log("Token:", token)
-    console.log("Stored User:", storedUser)
+    
     if (!token || !storedUser) {
       
       return [];
@@ -109,7 +108,7 @@ const DynamicSidebarNav = async () => {
 		return menuItems; 
 	} catch (err) {
 		console.error("Error al cargar el menú:", err)
-		return ("No se pudo cargar el menú.")
+		return []
 	} 
 }
 

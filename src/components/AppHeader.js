@@ -62,10 +62,16 @@ const AppHeader = () => {
     // Mapeo simple de rutas a títulos
     const routeTitles = {
       '/dashboard': 'Dashboard',
-      '/perfil': 'Perfil Usuario',
+      '/perfil': 'Perfil',
       '/bitacoras': 'Bitácoras',
       '/reuniones': 'Reuniones',
       '/carteleras': 'Carteleras',
+      '/configuracion/usuarios': 'Administracion / Configuracion / Usuarios',
+      '/configuracion/areas': 'Administracion / Configuracion / Áreas',
+      '/configuracion/equipos': 'Administracion / Configuracion / Equipos',
+      '/force/sistemas': 'Administracion / Force / Sistemas',
+      '/force/senales': 'Administracion / Force / Señales',
+      '/force/registros': 'Registros / Force',
       // Añadir más mapeos según sea necesario
     }
     
