@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
+import { useCallback } from 'react';
 import {
   CContainer,
   CHeader,
@@ -78,7 +79,21 @@ const AppHeader = () => {
     // Actualizar el título según la ruta actual
     const path = location.pathname
     setPageTitle(routeTitles[path] || 'Dashboard') // Usar Dashboard como valor por defecto
-  }, [location])
+  }, [location]);
+
+  // Manejar cierre de sesión
+  const handleLogout = useCallback(() => {
+    // Eliminar los datos de autenticación del almacenamiento local
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    // Actualizar el estado local
+    setIsAuthenticated(false)
+    setUserData(null)
+    // Actualizar el store global - esto actualizará los ítems del sidebar
+    dispatch({ type: 'LOGOUT' })
+    // Opcional: redireccionar al dashboard
+    navigate('/dashboard')
+  }, [dispatch, navigate]);
 
   // Verificar si el usuario ya está autenticado al cargar el componente
   useEffect(() => {
@@ -105,21 +120,7 @@ const AppHeader = () => {
       // Si no hay datos de autenticación, asegurar que el menú muestre solo ítems públicos
       dispatch({ type: 'LOGOUT' })
     }
-  }, [dispatch])
-
-  // Manejar cierre de sesión
-  const handleLogout = () => {
-    // Eliminar los datos de autenticación del almacenamiento local
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    // Actualizar el estado local
-    setIsAuthenticated(false)
-    setUserData(null)
-    // Actualizar el store global - esto actualizará los ítems del sidebar
-    dispatch({ type: 'LOGOUT' })
-    // Opcional: redireccionar al dashboard
-    navigate('/dashboard')
-  }
+  }, [dispatch, handleLogout]);
   
   // Manejar clic en "Abrir Sesión"
   const handleLoginClick = () => {
@@ -133,7 +134,8 @@ const AppHeader = () => {
   // Función para obtener la URL de la imagen del usuario
   const getUserImageUrl = () => {
     if (isAuthenticated && userData && userData.trabajador) {
-      return `${IMAGES_URL}/${userData.trabajador}`
+      const imageUrlUser = `${IMAGES_URL}?file=${userData.trabajador}.bmp`      
+      return imageUrlUser
     }
     return usuarioDesconocido
   }

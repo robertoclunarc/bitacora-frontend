@@ -2,16 +2,15 @@ import axios from 'axios'
 
 const API_URL = `${process.env.REACT_APP_API_URL}/menus`;
 
-export const getMenus = async (token) => {  
-  // Configurar headers con el token
-  const config = {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  }
-  
+export const getMenus = async (token) => {
+  console.log("Token desde el servicio:", token)
+  // Configurar headers con el token  
   try {    
-    const response = await axios.get(`${API_URL}/tree`, config);
+    const response = await axios.get(`${API_URL}/tree`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
     return response.data;
   } catch (error) {
     console.error('Error al obtener menús:', error)

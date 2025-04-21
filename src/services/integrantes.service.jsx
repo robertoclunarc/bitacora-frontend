@@ -77,7 +77,7 @@ export const deleteIntegrante = async (id) => {
 export const searchIntegrantes = async (searchTerm = '') => {
   try {
     const response = await axios.get(
-      `${EXTERNAL_API_URL}/search/${searchTerm}`
+      `${EXTERNAL_API_URL}/gettrabajadoresrrhh.php?searchTerm=${searchTerm}`
     );
     return response.data;
   } catch (error) {
