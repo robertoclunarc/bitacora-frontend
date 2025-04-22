@@ -18,11 +18,10 @@ const UsuariosComponent = React.lazy(() => import('../views/configuracion/usuari
 // Componentes protegidos (envueltos con AdminRoute)
 // Usuarios
 //const Usuarios = () => <AdminRoute><UsuariosComponent /></AdminRoute>
-/*
+
 // Bitácoras
-const Bitacoras = React.lazy(() => import('../views/bitacoras/Bitacoras'))
-const BitacoraForm = React.lazy(() => import('../views/bitacoras/BitacoraForm'))
-*/
+const Bitacoras = React.lazy(() => import('../views/pages/register/bitacoras'))
+
 // Reuniones
 const Reuniones = React.lazy(() => import('../views/pages/register/reuniones'))
 
@@ -50,6 +49,7 @@ const routes = [
   //registros
   { path: '/force/registros', name: 'Registros Force', element: ForceRegistros },
   { path: '/reuniones', name: 'Reuniones', element: Reuniones },
+  { path: '/bitacoras', name: 'Gestión de Bitácoras', element: Bitacoras },
   
 ]
 

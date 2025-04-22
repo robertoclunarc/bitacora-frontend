@@ -24,6 +24,7 @@ export const logIn = async (user, passw) => {
       login: user,
       password: passw
     })
+    console.log('Respuesta del logueo:', response.data)
     return response.data;
   } catch (error) {
     console.error('Error en logueo:', error)

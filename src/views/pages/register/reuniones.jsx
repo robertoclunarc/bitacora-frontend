@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 //import { useNavigate } from 'react-router-dom';
 import {
   CCard,
@@ -54,7 +54,7 @@ import {
   cilUserPlus,
   cilCheck,
   cilX, 
-  cilCheckAlt
+  cilCheckAlt, cilUser
 } from '@coreui/icons';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -81,6 +81,7 @@ import {
   updateIntegrante
 } from '../../../services/integrantes.service';
 import { sendReunionNotification } from '../../../services/notificaciones.service';
+import { getAreas } from '../../../services/areas.service';
 
 const Reuniones = () => {
   //const navigate = useNavigate();
@@ -145,16 +146,20 @@ const Reuniones = () => {
   const [integranteForm, setIntegranteForm] = useState({
     nombres_apellidos_integrante: '',
     emailintegrante: '',
-    asistio: null  // Inicialmente null en lugar de true
+    asistio: null
   });
 
+  // Estado para la edición de un integrante específico
+  const [editingIntegrante, setEditingIntegrante] = useState(null);
+  const [showEditIntegranteModal, setShowEditIntegranteModal] = useState(false);
+
   // Añadir estado para edición de integrantes
-  const [editingIntegranteId, setEditingIntegranteId] = useState(null);
+  /*const [editingIntegranteId, setEditingIntegranteId] = useState(null);
   const [integranteEditForm, setIntegranteEditForm] = useState({
     nombres_apellidos_integrante: '',
     emailintegrante: '',
     asistio: null
-  });
+  });*/
 
   // Estado para modal de registro de asistencia
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
@@ -172,22 +177,20 @@ const Reuniones = () => {
 
   // Iniciar edición de integrante
   const handleEditIntegranteStart = (integrante) => {
-    setIntegranteEditForm({
-      nombres_apellidos_integrante: integrante.nombres_apellidos_integrante,
-      emailintegrante: integrante.emailintegrante,
-      asistio: integrante.asistio
-    });
-    setEditingIntegranteId(integrante.idintegrantereunion || integrante.tempId);
+    setEditingIntegrante(integrante);
+    setShowEditIntegranteModal(true);
   };
 
   // Guardar cambios de integrante
   const handleEditIntegranteSave = () => {
+    if (!editingIntegrante) return;
+    
     const updatedIntegrantes = integrantes.map(integrante => {
-      if ((integrante.idintegrantereunion && integrante.idintegrantereunion === editingIntegranteId) || 
-          (!integrante.idintegrantereunion && integrante.tempId === editingIntegranteId)) {
+      if ((integrante.idintegrantereunion && integrante.idintegrantereunion === editingIntegrante.idintegrantereunion) || 
+          (!integrante.idintegrantereunion && integrante.tempId === editingIntegrante.tempId)) {
         return {
           ...integrante,
-          asistio: integranteEditForm.asistio,
+          asistio: editingIntegrante.asistio,
           isEdited: true
         };
       }
@@ -195,11 +198,12 @@ const Reuniones = () => {
     });
     
     setIntegrantes(updatedIntegrantes);
-    setEditingIntegranteId(null);
+    setShowEditIntegranteModal(false);
+    setEditingIntegrante(null);
   };
   
   // Función para cargar reuniones
-  const loadReuniones = async (page = 1, filtersObj = filters) => {
+  const loadReuniones = useCallback(async (page = 1, filtersObj = filters) => {
     try {
       setLoading(true);
       const response = await getReuniones(page, itemsPerPage, filtersObj);
@@ -218,28 +222,24 @@ const Reuniones = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, itemsPerPage]); 
   
   // Función para cargar áreas
-  const loadAreas = async () => {
+  const loadAreas = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/areas`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      setAreas(data.areas || []);
+      const response = await getAreas(localStorage.getItem('token'));
+      
+      setAreas(response.areas || []);
     } catch (err) {
       console.error('Error al cargar áreas:', err);
     }
-  };
+  }, []);
   
   // Cargar reuniones y áreas al iniciar
   useEffect(() => {
     loadReuniones(activePage);
     loadAreas();
-  }, [activePage]);
+  }, [activePage, loadReuniones, loadAreas]);
   
   // Función para manejar cambio de página
   const handlePageChange = (page) => {
@@ -363,6 +363,7 @@ const Reuniones = () => {
     try {
       setLoadingIntegrantes(true);
       const response = await getIntegrantesByReunion(reunionId);
+      
       setIntegrantes(response.integrantes || []);
     } catch (err) {
       console.error(`Error al cargar integrantes de la reunión ${reunionId}:`, err);
@@ -456,7 +457,10 @@ const Reuniones = () => {
           } else if (integrante.isEdited && !integrante.isDeleted) {
             // Integrante con asistencia actualizada
             await updateIntegrante(integrante.idintegrantereunion, {
-              asistio: integrante.asistio
+              asistio: integrante.asistio,
+              nombres_apellidos_integrante: integrante.nombres_apellidos_integrante,
+              emailintegrante: integrante.emailintegrante,
+              fkreunion: reunionId
             });
           } else if (integrante.isDeleted) {
             // Integrante eliminado
@@ -1083,6 +1087,69 @@ const Reuniones = () => {
           </CCardBody>
         </CCard>
       </CCol>
+      {/* Modal para editar integrante individualmente */}
+      <CModal 
+        visible={showEditIntegranteModal} 
+        onClose={() => setShowEditIntegranteModal(false)}
+        size="md"
+      >
+        <CModalHeader>
+          <CModalTitle>
+            <CIcon icon={cilUser} className="me-2" />
+            Editar Asistencia de Integrante
+          </CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {editingIntegrante && (
+            <CForm>
+              <div className="mb-3">
+                <CFormLabel>Nombre del Integrante</CFormLabel>
+                <CFormInput
+                  value={editingIntegrante.nombres_apellidos_integrante}
+                  readOnly
+                />
+              </div>
+              
+              <div className="mb-3">
+                <CFormLabel>Correo Electrónico</CFormLabel>
+                <CFormInput
+                  value={editingIntegrante.emailintegrante}
+                  readOnly
+                />
+              </div>
+              
+              <div className="mb-3">
+                <CFormLabel>¿Asistió a la reunión?</CFormLabel>
+                <CFormSelect
+                  value={editingIntegrante.asistio === null ? '' : editingIntegrante.asistio.toString()}
+                  onChange={(e) => setEditingIntegrante({
+                    ...editingIntegrante,
+                    asistio: e.target.value === '' ? null : e.target.value === 'true'
+                  })}
+                >
+                  <option value="">Sin registrar</option>
+                  <option value="true">Sí asistió</option>
+                  <option value="false">No asistió</option>
+                </CFormSelect>
+              </div>
+            </CForm>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton 
+            color="secondary" 
+            onClick={() => setShowEditIntegranteModal(false)}
+          >
+            Cancelar
+          </CButton>
+          <CButton 
+            color="primary" 
+            onClick={handleEditIntegranteSave}
+          >
+            Guardar Cambios
+          </CButton>
+        </CModalFooter>
+      </CModal>
       
       {/* Modal para crear/editar reunión */}
       <CModal 
@@ -1322,7 +1389,7 @@ const Reuniones = () => {
             {/* Pestaña de Minutas */}
             <CTabPane role="tabpanel" aria-labelledby="minutas-tab-pane" visible={activeTab === 2}>
               <div className="mb-3">
-                <h5>Agregar Minuta</h5>
+                <h6>Agregar Minuta</h6>
                 <CForm className="row g-3">
                   <CCol md={editingMinutaId ? 6 : 8}>
                     <CFormLabel>Descripción</CFormLabel>
@@ -1380,7 +1447,7 @@ const Reuniones = () => {
               <hr />
               
               <div className="mt-3">
-                <h5>Minutas de la Reunión</h5>
+                <h6>Minutas de la Reunión</h6>
                 {loadingMinutas ? (
                   <div className="text-center my-3">
                     <CSpinner size="sm" />
@@ -1611,7 +1678,7 @@ const Reuniones = () => {
               <hr />
               
               <div className="mt-3">
-                <h5>Integrantes de la Reunión {integrantes.filter(i => !i.isDeleted).length > 0 && `(${integrantes.filter(i => !i.isDeleted).length})`}</h5>
+                <h6>Integrantes de la Reunión {integrantes.filter(i => !i.isDeleted).length > 0 && `(${integrantes.filter(i => !i.isDeleted).length})`}</h6>
                 {loadingIntegrantes ? (
                   <div className="text-center my-3">
                     <CSpinner size="sm" />
@@ -1651,7 +1718,7 @@ const Reuniones = () => {
                                 )}
                               </CTableDataCell>
                               <CTableDataCell className="text-center">
-                                {reunionForm.estatus !== 'PROGRAMADA' && (
+                                {(reunionForm.estatus !== 'CANCELADA' || reunionForm.estatus !== 'FINALIZADA') && (
                                   <CButton
                                     color="primary"
                                     size="sm"

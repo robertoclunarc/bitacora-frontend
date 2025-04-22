@@ -41,11 +41,6 @@ const getNavItems = (isAuthenticated, userData) => {
     cilSpeedometer,
     
   } = require('@coreui/icons')
-
-  // Si no está autenticado, solo devolver ítems públicos
-  console.log('isAuthenticated', isAuthenticated)
-  console.log('userData', userData)
-  console.log('navigation', navigation)
   
   if (!isAuthenticated || !userData || navigation.length === 0) {
     const publicItems = [
