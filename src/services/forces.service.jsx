@@ -23,7 +23,7 @@ export const getForcesPages = async (page, token) => {
             'Authorization': `Bearer ${token}`
         }
         })
-        console.log('Response:', response.data)
+        
         return response.data;
     } catch (error) {
         console.error('Error al obtener Forces:', error)

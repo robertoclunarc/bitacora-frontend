@@ -86,6 +86,7 @@ import {
 } from '../../../services/archivos.service';
 import { getTiposBitacora } from '../../../services/tiposBitacora.service';
 import { getEquipos } from '../../../services/equipos.service';
+import { getAreas } from '../../../services/areas.service';
 
 const Bitacoras = () => {
   //const navigate = useNavigate();
@@ -103,7 +104,7 @@ const Bitacoras = () => {
   const [totalItems, setTotalItems] = useState(0);
   
   // Estados para el filtrado
-  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(true);
   const [filters, setFilters] = useState({
     tema: '',
     fecha_inicio: '',
@@ -166,7 +167,7 @@ const Bitacoras = () => {
     try {
       setLoading(true);
       const response = await getBitacoras(page, itemsPerPage, filtersObj);
-      console.log('Bitácoras cargadas:', response);
+      
       setBitacoras(Array.isArray(response.bitacoras) ? response.bitacoras : []);
       if (response.pagination) {
         setTotalItems(response.pagination.total || 0);
@@ -194,13 +195,9 @@ const Bitacoras = () => {
       }
       
       // Cargar áreas
-      const areasResponse = await fetch(`${process.env.REACT_APP_API_URL}/areas`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const areasData = await areasResponse.json();
-      setAreas(areasData.areas || []);
+      const areasResponse = await getAreas(localStorage.getItem('token'));
+      
+      setAreas(areasResponse.areas || []);
       
       // Cargar tipos de bitácora
       const tiposResponse = await getTiposBitacora();
@@ -601,7 +598,7 @@ const Bitacoras = () => {
                   Nueva Bitácora
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "gray"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

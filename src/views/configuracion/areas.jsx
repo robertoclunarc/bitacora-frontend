@@ -305,7 +305,7 @@ const Areas = () => {
                   Nuevo Area
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "grey"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

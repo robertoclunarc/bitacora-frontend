@@ -98,7 +98,7 @@ const Reuniones = () => {
   const [totalItems, setTotalItems] = useState(0);
   
   // Estados para el filtrado
-  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(true);
   const [filters, setFilters] = useState({
     tema: '',
     fecha_inicio: '',
@@ -837,7 +837,7 @@ const Reuniones = () => {
                   Nueva Reunión
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "gray"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

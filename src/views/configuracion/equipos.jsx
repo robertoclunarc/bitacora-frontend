@@ -259,7 +259,7 @@ useEffect(() => {
                   Nuevo Equipo
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "gray"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

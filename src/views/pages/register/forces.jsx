@@ -51,7 +51,7 @@ const Forces = () => {
   const [itemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   
-  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterVisible, setFilterVisible] = useState(true);
   const [filters, setFilters] = useState({
     causas: '',
     valor: '',
@@ -309,7 +309,7 @@ const Forces = () => {
                   Nueva Fuerza
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "gray"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

@@ -392,7 +392,7 @@ const Usuarios = () => {
                   Nuevo Usuario
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "gray"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

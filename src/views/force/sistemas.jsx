@@ -228,7 +228,7 @@ useEffect(() => {
                   Nuevo Sistema
                 </CButton>
                 <CButton 
-                  color={filterVisible ? "dark" : "light"}
+                  color={filterVisible ? "dark" : "grey"}
                   variant="outline"
                   onClick={() => setFilterVisible(!filterVisible)}
                 >

@@ -25,11 +25,10 @@ const Bitacoras = React.lazy(() => import('../views/pages/register/bitacoras'))
 // Reuniones
 const Reuniones = React.lazy(() => import('../views/pages/register/reuniones'))
 
-/*
+
 // Carteleras
-const Carteleras = React.lazy(() => import('../views/carteleras/Carteleras'))
-const CarteleraForm = React.lazy(() => import('../views/carteleras/CarteleraForm'))
-*/
+const Carteleras = React.lazy(() => import('../views/pages/register/carteleras'))
+
 // Force
 const SistemasForce = React.lazy(() => import('../views/force/sistemas'))
 const SenalesForce = React.lazy(() => import('../views/force/senales'))
@@ -50,6 +49,7 @@ const routes = [
   { path: '/force/registros', name: 'Registros Force', element: ForceRegistros },
   { path: '/reuniones', name: 'Reuniones', element: Reuniones },
   { path: '/bitacoras', name: 'Gestión de Bitácoras', element: Bitacoras },
+  { path: '/carteleras', name: 'Gestión de Carteleras', element: Carteleras },
   
 ]
 
