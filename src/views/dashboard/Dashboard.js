@@ -60,7 +60,7 @@ const Dashboard = () => {
           // Limitar a 12 carteleras
           setCarteleras(sortedCarteleras.slice(0, 12))
           setCartelerasAll(sortedCarteleras.slice(0, 12))
-          setTotalCarteleras(cartelerasAll.length || 0)
+          setTotalCarteleras(response.carteleras.length || 0)
         }
       } catch (err) {
         console.error('Error al obtener carteleras:', err)

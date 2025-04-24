@@ -16,8 +16,7 @@ export const getBitacorasActive = async (limit, offset) => {
   
   const config = {
     headers: 
-    {'Content-Type': 'application/json'}
-    
+    {'Content-Type': 'application/json'}    
   }
   
   try {    
@@ -39,13 +38,13 @@ export const getBitacoras = async (page = 1, limit = 10, filters = {}) => {
     
     // Añadir filtros si existen
     Object.keys(filters).forEach(key => {
-      if (filters[key]) {
+      if (filters[key] !== undefined && filters[key] !== '') {
         params.append(key, filters[key]);
       }
     });
     
-    const response = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeader());
-    return response.data;
+    const response = await axios.get(`${API_URL}/authenticated?${params.toString()}`, getAuthHeader());
+    return response.data.bitacoras;
   } catch (error) {
     console.error('Error al obtener bitácoras:', error);
     throw error;
@@ -66,6 +65,7 @@ export const getBitacoraById = async (id) => {
 // Crear una nueva bitácora
 export const createBitacora = async (bitacoraData) => {
   try {
+    
     const response = await axios.post(`${API_URL}`, bitacoraData, getAuthHeader());
     return response.data;
   } catch (error) {
@@ -76,6 +76,7 @@ export const createBitacora = async (bitacoraData) => {
 
 // Actualizar una bitácora existente
 export const updateBitacora = async (id, bitacoraData) => {
+  
   try {
     const response = await axios.put(`${API_URL}/${id}`, bitacoraData, getAuthHeader());
     return response.data;
@@ -100,7 +101,7 @@ export const deleteBitacora = async (id) => {
 export const updateBitacoraStatus = async (id, estatus) => {
   try {
     const response = await axios.patch(
-      `${API_URL}/${id}/estatus`, 
+      `${API_URL}/${id}/status`, 
       { estatus }, 
       getAuthHeader()
     );
@@ -111,48 +112,17 @@ export const updateBitacoraStatus = async (id, estatus) => {
   }
 };
 
-// Obtener tipos de bitácoras (catálogo)
-export const getTiposBitacora = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/catalogos/tipos-bitacora`, getAuthHeader());
-    return response.data;
-  } catch (error) {
-    console.error('Error al obtener tipos de bitácora:', error);
-    throw error;
-  }
-};
-
-// Subir archivos adjuntos a una bitácora
-export const uploadAdjuntosBitacora = async (bitacoraId, formData) => {
+// Publicar o quitar una bitácora de cartelera
+export const toggleBitacoraCartelera = async (id) => {
   try {
     const response = await axios.post(
-      `${API_URL}/${bitacoraId}/adjuntos`, 
-      formData, 
-      {
-        ...getAuthHeader(),
-        headers: {
-          ...getAuthHeader().headers,
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(`Error al subir adjuntos para bitácora ${bitacoraId}:`, error);
-    throw error;
-  }
-};
-
-// Eliminar un archivo adjunto
-export const deleteAdjuntoBitacora = async (bitacoraId, adjuntoId) => {
-  try {
-    const response = await axios.delete(
-      `${API_URL}/bitacoras/${bitacoraId}/adjuntos/${adjuntoId}`, 
+      `${API_URL}/${id}/cartelera`, 
+      {}, 
       getAuthHeader()
     );
     return response.data;
   } catch (error) {
-    console.error(`Error al eliminar adjunto ${adjuntoId} de bitácora ${bitacoraId}:`, error);
+    console.error(`Error al cambiar estado de cartelera para bitácora ${id}:`, error);
     throw error;
   }
 };
