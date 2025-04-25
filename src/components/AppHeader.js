@@ -73,6 +73,8 @@ const AppHeader = () => {
       '/force/sistemas': 'Administracion / Force / Sistemas',
       '/force/senales': 'Administracion / Force / Señales',
       '/force/registros': 'Registros / Force',
+      '/incidencias': 'Registros / Incidencias',
+      '/tareas': 'Registros / Actividades',
       // Añadir más mapeos según sea necesario
     }
     

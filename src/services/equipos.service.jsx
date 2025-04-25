@@ -57,3 +57,17 @@ export const createEquipo = async (equipoData, token) => {
       throw error
     }
   }
+
+  export const getEquipoById = async (id, token) => {
+    try {
+      const response = await axios.get(`${API_URL}/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error al obtener equipo ${id}:`, error);
+      throw error;
+    }
+  };  

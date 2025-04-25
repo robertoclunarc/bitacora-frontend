@@ -205,6 +205,7 @@ const Bitacoras = () => {
       
       // Cargar equipos
       const equiposResponse = await getEquipos(localStorage.getItem('token'));
+      //console.log('Equipos:', equiposResponse.equipos);
       setEquipos(equiposResponse.equipos || []);
     } catch (err) {
       console.error('Error al cargar catálogos:', err);
@@ -728,7 +729,7 @@ const Bitacoras = () => {
                     <option value="">Todos</option>
                     {equipos.map(equipo => (
                       <option key={equipo.idequipo} value={equipo.idequipo}>
-                        {equipo.nombreequipo}
+                        {equipo.descripcion_equipo}
                       </option>
                     ))}
                   </CFormSelect>
@@ -1091,7 +1092,7 @@ const Bitacoras = () => {
                     <option value="">Sin equipo</option>
                     {equipos.map(equipo => (
                       <option key={equipo.idequipo} value={equipo.idequipo}>
-                        {equipo.nombreequipo}
+                        {equipo.descripcion_equipo}
                       </option>
                     ))}
                   </CFormSelect>

@@ -1,13 +1,11 @@
 import React from 'react'
 //import AdminRoute from '../components/auth/AdminRoute';
 
-
 const Dashboard = React.lazy(() => import('../views/dashboard/Dashboard'))
 const PerfilUsuario = React.lazy(() => import('../views/perfil/PerfilUsuario'))
 
 // Areas
 const Areas = React.lazy(() => import('../views/configuracion/areas'))
-
 
 // Equipos
 const Equipos = React.lazy(() => import('../views/configuracion/equipos'))
@@ -25,6 +23,11 @@ const Bitacoras = React.lazy(() => import('../views/pages/register/bitacoras'))
 // Reuniones
 const Reuniones = React.lazy(() => import('../views/pages/register/reuniones'))
 
+// Incidencias
+const Incidencias = React.lazy(() => import('../views/pages/register/incidencias'))
+
+// Actividades = tareas
+const Actividades = React.lazy(() => import('../views/pages/register/tareas'))
 
 // Carteleras
 const Carteleras = React.lazy(() => import('../views/pages/register/carteleras'))
@@ -50,6 +53,8 @@ const routes = [
   { path: '/reuniones', name: 'Reuniones', element: Reuniones },
   { path: '/bitacoras', name: 'Gestión de Bitácoras', element: Bitacoras },
   { path: '/carteleras', name: 'Gestión de Carteleras', element: Carteleras },
+  { path: '/Incidencias', name: 'Gestión de Incidencias', element: Incidencias },
+  { path: '/tareas', name: 'Gestión de Actividades', element: Actividades },
   
 ]
 

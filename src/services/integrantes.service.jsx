@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base del API
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = `${process.env.REACT_APP_API_URL}/integrantes-reunion`;
 // URL para la API externa de integrantes
 const EXTERNAL_API_URL = process.env.REACT_APP_EXTERNAL_API_URL || 'http://localhost:3250/sist_tthh/api/trabajadores';
 
@@ -19,7 +19,7 @@ const getAuthHeader = () => {
 export const getIntegrantesByReunion = async (reunionId) => {
   try {
     const response = await axios.get(
-      `${API_URL}/integrantes-reunion/reunion/${reunionId}`, 
+      `${API_URL}/reunion/${reunionId}`, 
       getAuthHeader()
     );
     return response.data;
@@ -33,7 +33,7 @@ export const getIntegrantesByReunion = async (reunionId) => {
 export const createIntegrante = async (integranteData) => {
   try {
     const response = await axios.post(
-      `${API_URL}/integrantes-reunion`, 
+      `${API_URL}`, 
       integranteData, 
       getAuthHeader()
     );
@@ -48,7 +48,7 @@ export const createIntegrante = async (integranteData) => {
 export const updateIntegrante = async (id, integranteData) => {
   try {
     const response = await axios.put(
-      `${API_URL}/integrantes-reunion/${id}`, 
+      `${API_URL}/${id}`, 
       integranteData, 
       getAuthHeader()
     );
@@ -63,7 +63,7 @@ export const updateIntegrante = async (id, integranteData) => {
 export const deleteIntegrante = async (id) => {
   try {
     const response = await axios.delete(
-      `${API_URL}/integrantes-reunion/${id}`, 
+      `${API_URL}/${id}`, 
       getAuthHeader()
     );
     return response.data;
