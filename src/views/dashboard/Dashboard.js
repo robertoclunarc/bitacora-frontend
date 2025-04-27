@@ -5,16 +5,19 @@ import {
   CCol,  CRow,  CSpinner,
   CBadge,  CTable,  CTableBody,  CTableDataCell,
   CTableHead,  CTableHeaderCell,  CTableRow,  CProgress,
-  CModal, CModalBody, CModalHeader, CModalTitle, CModalFooter
+  CModal, CModalBody, CModalHeader, CModalTitle, CModalFooter,
+  CCarousel, CCarouselItem, CCarouselCaption, CImage
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { 
   cilBell,   cilWarning, cilUser,  cilClock, 
-  cilInfo,   cilCalendarCheck,  cilPeople
+  cilInfo,   cilCalendarCheck,  cilPeople,
+  cilImage
 } from '@coreui/icons'
 import { getCarteleraActive } from '../../services/cartelera.service'
 import { getBitacorasActive } from '../../services/bitocoras.services'
 import { getReunionesActive } from '../../services/reuniones.service'
+import { getImagenesPublicas } from '../../services/archivos.service'
 
 const Dashboard = () => {
   const [carteleras, setCarteleras] = useState([])
@@ -32,6 +35,10 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false)
 
   const [filtroTipo, setFiltroTipo] = useState('Todas');
+  
+  // Estado para las imágenes del carrusel
+  const [imagenesCarrusel, setImagenesCarrusel] = useState([])
+  const [loadingImagenes, setLoadingImagenes] = useState(true)
 
   useEffect(() => {
     // Función para obtener carteleras
@@ -111,9 +118,27 @@ const Dashboard = () => {
         setLoadingActividad(false)
       }
     }
+    
+    // Función para obtener imágenes para el carrusel
+    const fetchImagenesCarrusel = async () => {
+      try {
+        setLoadingImagenes(true)
+        
+        const response = await getImagenesPublicas(15) // Obtener hasta 15 imágenes
+        
+        if (response && response.imagenes) {
+          setImagenesCarrusel(response.imagenes)
+        }
+      } catch (err) {
+        console.error('Error al obtener imágenes para el carrusel:', err)
+      } finally {
+        setLoadingImagenes(false)
+      }
+    }
 
     fetchCarteleras()
     fetchActividad()
+    fetchImagenesCarrusel()
   }, [])
 
   // Función para obtener el ícono según el tipo_info
@@ -247,6 +272,48 @@ const Dashboard = () => {
                 ))
               )}
             </CRow>
+          )}
+        </CCardBody>
+      </CCard>
+
+      {/* Carrusel de imágenes de bitácoras públicas */}
+      <CCard className="mb-4">
+        <CCardHeader>
+          <div className="d-flex align-items-center">
+            <CIcon icon={cilImage} className="me-2" />
+            <h4 className="mb-0">Galería de Bitácoras</h4>
+          </div>
+        </CCardHeader>
+        <CCardBody>
+          {loadingImagenes ? (
+            <div className="d-flex justify-content-center my-4">
+              <CSpinner color="primary" />
+            </div>
+          ) : imagenesCarrusel.length === 0 ? (
+            <div className="text-center my-4">
+              <p>No hay imágenes de bitácoras disponibles para mostrar.</p>
+            </div>
+          ) : (
+            <CCarousel controls interval={7000} dark>
+              {imagenesCarrusel.map((imagen, index) => (
+                <CCarouselItem key={imagen.idarchivo || index}>
+                  <CImage
+                    className="d-block w-100"
+                    src={imagen.url_imagen}
+                    alt={imagen.descripcion || `Imagen ${index + 1}`}
+                    style={{ 
+                      objectFit: 'contain', 
+                      height: '400px',
+                      backgroundColor: '#f8f9fa'
+                    }}
+                  />
+                  <CCarouselCaption className="d-none d-md-block bg-dark bg-opacity-50 rounded">
+                    <h5>{imagen.tema_bitacora || imagen.descripcion || `Imagen ${index + 1}`}</h5>
+                    <p>{imagen.descripcion || ''}</p>
+                  </CCarouselCaption>
+                </CCarouselItem>
+              ))}
+            </CCarousel>
           )}
         </CCardBody>
       </CCard>
