@@ -108,7 +108,7 @@ export const deleteArchivo = async (bitacoraId, archivoId) => {
 
 export const getImagenesPublicas = async (limit = 10) => {
   try {
-    const response = await axios.get(`${API_URL}/imagenes-publicas?limit=${limit}`, getAuthHeader());
+    const response = await axios.get(`${API_URL}-publicos/imagenes?limit=${limit}`, getAuthHeader());
     return response.data;
   } catch (error) {
     console.error('Error al obtener imágenes públicas:', error);

@@ -18,6 +18,7 @@ import { getCarteleraActive } from '../../services/cartelera.service'
 import { getBitacorasActive } from '../../services/bitocoras.services'
 import { getReunionesActive } from '../../services/reuniones.service'
 import { getImagenesPublicas } from '../../services/archivos.service'
+import { getTotalUsuarios, getActividadUsuarios, getReunionesPendientes } from '../../services/resumen-sistema.service'
 
 const Dashboard = () => {
   const [carteleras, setCarteleras] = useState([])
@@ -29,6 +30,10 @@ const Dashboard = () => {
   const [totalBitacoras, setTotalBitacoras] = useState(0)
   const [totalReuniones, setTotalReuniones] = useState(0)
   const [totalCarteletas, setTotalCarteleras] = useState(0)
+  const [totalUsuarios, setTotalUsuarios] = useState(0)
+  const [reunionesPendientes, setReunionesPendientes] = useState({ total: 0, porcentaje: 0 })
+  const [actividadUsuarios, setActividadUsuarios] = useState({ total: 0, porcentaje: 0 })
+  const [loadingResumen, setLoadingResumen] = useState(true)
 
   // Estados para el modal
   const [selectedCartelera, setSelectedCartelera] = useState(null)
@@ -136,10 +141,55 @@ const Dashboard = () => {
       }
     }
 
+    // Función para obtener datos del resumen del sistema
+    const fetchResumenDatos = async () => {
+      try {
+        setLoadingResumen(true)
+        
+        // Obtener datos para el resumen del sistema
+        const [usuariosRes, reunionesPendientesRes, actividadUsuariosRes] = await Promise.all([
+          getTotalUsuarios(),
+          getReunionesPendientes(),
+          getActividadUsuarios()
+        ])
+        
+        // Actualizar estados con los datos obtenidos
+        setTotalUsuarios(usuariosRes.total || 0)
+        
+        // Calcular porcentaje de reuniones pendientes (por ejemplo, sobre el total de reuniones)
+        const totalReunionesPendientes = reunionesPendientesRes.total || 0
+        const porcentajeReunionesPendientes = reunionesPendientesRes.porcentaje || 
+          (totalReuniones > 0 ? Math.round((totalReunionesPendientes / totalReuniones) * 100) : 0)
+        
+        setReunionesPendientes({
+          total: totalReunionesPendientes,
+          porcentaje: porcentajeReunionesPendientes
+        })
+        
+        // Actividad de usuarios
+        setActividadUsuarios({
+          total: actividadUsuariosRes.total || 0,
+          porcentaje: actividadUsuariosRes.porcentaje || 0
+        })
+        
+      } catch (err) {
+        console.error('Error al obtener datos del resumen:', err)
+        // Establecer valores predeterminados en caso de error
+        setTotalUsuarios(0)
+        setReunionesPendientes({ total: 0, porcentaje: 0 })
+        setActividadUsuarios({ total: 0, porcentaje: 0 })
+      } finally {
+        setLoadingResumen(false)
+      }
+    }
+
     fetchCarteleras()
     fetchActividad()
     fetchImagenesCarrusel()
-  }, [])
+    fetchResumenDatos()
+  }, [totalReuniones])
+
+  
 
   // Función para obtener el ícono según el tipo_info
   const getIconByType = (type) => {
@@ -373,57 +423,65 @@ const Dashboard = () => {
               <strong>Resumen del Sistema</strong>
             </CCardHeader>
             <CCardBody>
-              <CRow>
-                <CCol xs={6} md={6} className="mb-3">
-                  <div className="border-start border-start-4 border-start-info py-1 px-3">
-                    <div className="text-medium-emphasis small">Bitácoras</div>
-                    <div className="fs-5 fw-semibold">{ totalBitacoras }</div>
+              {loadingResumen ? (
+                  <div className="text-center my-3">
+                    <CSpinner size="sm" />
                   </div>
-                </CCol>
-                <CCol xs={6} md={6} className="mb-3">
-                  <div className="border-start border-start-4 border-start-danger py-1 px-3">
-                    <div className="text-medium-emphasis small">Reuniones</div>
-                    <div className="fs-5 fw-semibold">{ totalReuniones }</div>
-                  </div>
-                </CCol>
-                <CCol xs={6} md={6} className="mb-3">
-                  <div className="border-start border-start-4 border-start-warning py-1 px-3">
-                    <div className="text-medium-emphasis small">Carteleras</div>
-                    <div className="fs-5 fw-semibold">{totalCarteletas}</div>
-                  </div>
-                </CCol>
-                <CCol xs={6} md={6} className="mb-3">
-                  <div className="border-start border-start-4 border-start-success py-1 px-3">
-                    <div className="text-medium-emphasis small">Usuarios</div>
-                    <div className="fs-5 fw-semibold">25</div>
-                  </div>
-                </CCol>
-              </CRow>
+                ) : (
+                <>
+                <CRow>
+                  <CCol xs={6} md={6} className="mb-3">
+                    <div className="border-start border-start-4 border-start-info py-1 px-3">
+                      <div className="text-medium-emphasis small">Bitácoras</div>
+                      <div className="fs-5 fw-semibold">{ totalBitacoras }</div>
+                    </div>
+                  </CCol>
+                  <CCol xs={6} md={6} className="mb-3">
+                    <div className="border-start border-start-4 border-start-danger py-1 px-3">
+                      <div className="text-medium-emphasis small">Reuniones</div>
+                      <div className="fs-5 fw-semibold">{ totalReuniones }</div>
+                    </div>
+                  </CCol>
+                  <CCol xs={6} md={6} className="mb-3">
+                    <div className="border-start border-start-4 border-start-warning py-1 px-3">
+                      <div className="text-medium-emphasis small">Carteleras</div>
+                      <div className="fs-5 fw-semibold">{totalCarteletas}</div>
+                    </div>
+                  </CCol>
+                  <CCol xs={6} md={6} className="mb-3">
+                    <div className="border-start border-start-4 border-start-success py-1 px-3">
+                      <div className="text-medium-emphasis small">Usuarios</div>
+                      <div className="fs-5 fw-semibold">{totalUsuarios}</div>
+                    </div>
+                  </CCol>
+                </CRow>
 
-              <hr className="mt-0 mb-4" />
+                <hr className="mt-0 mb-4" />
 
-              <div className="mb-3 progress-group">
-                <div className="progress-group-header">
-                  <CIcon className="me-2" icon={cilCalendarCheck} />
-                  <span>Reuniones Pendientes</span>
-                  <span className="ms-auto fw-semibold">12</span>
-                  <span className="text-medium-emphasis small">(80%)</span>
+                <div className="mb-3 progress-group">
+                  <div className="progress-group-header">
+                    <CIcon className="me-2" icon={cilCalendarCheck} />
+                    <span>Reuniones Pendientes</span>
+                    <span className="ms-auto fw-semibold">{reunionesPendientes.total}</span>
+                    <span className="text-medium-emphasis small">({reunionesPendientes.porcentaje}%)</span>
+                  </div>
+                  <div className="progress-group-bars">
+                    <CProgress thin color="success" value={80} />
+                  </div>
                 </div>
-                <div className="progress-group-bars">
-                  <CProgress thin color="success" value={80} />
+                <div className="mb-3 progress-group">
+                  <div className="progress-group-header">
+                    <CIcon className="me-2" icon={cilPeople} />
+                    <span>Actividad de Usuarios</span>
+                    <span className="ms-auto fw-semibold">{actividadUsuarios.total}</span>
+                    <span className="text-medium-emphasis small">({actividadUsuarios.porcentaje}%)</span>
+                  </div>
+                  <div className="progress-group-bars">
+                    <CProgress thin color="info" value={60} />
+                  </div>
                 </div>
-              </div>
-              <div className="mb-3 progress-group">
-                <div className="progress-group-header">
-                  <CIcon className="me-2" icon={cilPeople} />
-                  <span>Actividad de Usuarios</span>
-                  <span className="ms-auto fw-semibold">15</span>
-                  <span className="text-medium-emphasis small">(60%)</span>
-                </div>
-                <div className="progress-group-bars">
-                  <CProgress thin color="info" value={60} />
-                </div>
-              </div>
+                </>
+              )}  
             </CCardBody>
           </CCard>
         </CCol>
