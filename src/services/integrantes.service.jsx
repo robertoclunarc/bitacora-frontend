@@ -79,6 +79,7 @@ export const searchIntegrantes = async (searchTerm = '') => {
     const response = await axios.get(
       `${EXTERNAL_API_URL}/gettrabajadoresrrhh.php?searchTerm=${searchTerm}`
     );
+    
     return response.data;
   } catch (error) {
     console.error('Error al buscar integrantes en la API externa:', error);

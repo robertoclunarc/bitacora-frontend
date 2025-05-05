@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base del API
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = `${process.env.REACT_APP_API_URL}/notificaciones`;
 
 // Función para obtener el token de autenticación
 const getAuthHeader = () => {
@@ -17,7 +17,7 @@ const getAuthHeader = () => {
 export const sendReunionNotification = async (notificationData) => {
   try {
     const response = await axios.post(
-      `${API_URL}/notificaciones/reunion`, 
+      `${API_URL}/reunion`, 
       notificationData, 
       getAuthHeader()
     );

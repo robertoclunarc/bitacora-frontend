@@ -95,10 +95,10 @@ const Reuniones = () => {
   const [activePage, setActivePage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);  
   
   // Estados para el filtrado
-  const [filterVisible, setFilterVisible] = useState(true);
+  const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState({
     tema: '',
     fecha_inicio: '',
@@ -142,6 +142,7 @@ const Reuniones = () => {
   
   // Estados para integrantes
   const [integrantes, setIntegrantes] = useState([]);
+  const [ totalIntegrantesEncontardos, setTotalIntegrantesEncontardos] = useState(0);
   const [loadingIntegrantes, setLoadingIntegrantes] = useState(false);
   const [integranteForm, setIntegranteForm] = useState({
     nombres_apellidos_integrante: '',
@@ -606,7 +607,8 @@ const Reuniones = () => {
     try {
       setLoadingSearch(true);
       const response = await searchIntegrantes(searchTerm);
-      setSearchResults(response || []);
+      setSearchResults(response.trabajadores || []);
+      setTotalIntegrantesEncontardos(response.count || 0);
     } catch (err) {
       console.error('Error al buscar integrantes:', err);
     } finally {
@@ -1569,7 +1571,7 @@ const Reuniones = () => {
                 {/* Resultados de búsqueda */}
                 {searchResults.length > 0 && (
                   <div className="mt-3 mb-3">
-                    <h6>Resultados de búsqueda</h6>
+                    <h6>Resultados de búsqueda ({totalIntegrantesEncontardos})</h6>
                     <CTable hover responsive size="sm" bordered={false}>
                       <CTableHead>
                         <CTableRow>

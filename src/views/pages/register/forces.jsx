@@ -108,8 +108,8 @@ const Forces = () => {
       
       setError(null);
     } catch (err) {
-      console.error('Error al cargar fuerzas:', err);
-      setError('No se pudieron cargar las fuerzas. Intente nuevamente.');
+      console.error('Error al cargar Forces:', err);
+      setError('No se pudieron cargar los Forces. Intente nuevamente.');
       setForces([]);
     } finally {
       setLoading(false);
@@ -268,8 +268,8 @@ const Forces = () => {
       setShowForceModal(false);
       setFormError(null);
     } catch (err) {
-      console.error('Error al guardar fuerza:', err);
-      setFormError('Error al guardar fuerza. Intente nuevamente.');
+      console.error('Error al guardar Force:', err);
+      setFormError('Error al guardar Force. Intente nuevamente.');
     } finally {
       setSaving(false);
     }
@@ -306,7 +306,7 @@ const Forces = () => {
                   onClick={handleNewForce}
                 >
                   <CIcon icon={cilPlus} className="me-2" />
-                  Nueva Fuerza
+                  Nueva Force
                 </CButton>
                 <CButton 
                   color={filterVisible ? "dark" : "gray"}
@@ -389,7 +389,7 @@ const Forces = () => {
             {loading ? (
               <div className="text-center my-5">
                 <CSpinner color="primary" />
-                <p className="mt-2">Cargando fuerzas...</p>
+                <p className="mt-2">Cargando fuerces...</p>
               </div>
             ) : (
               <>
@@ -407,7 +407,7 @@ const Forces = () => {
                     {forces.length === 0 ? (
                       <CTableRow>
                         <CTableDataCell colSpan={5} className="text-center">
-                          No se encontraron fuerzas
+                          No se encontraron Forces
                         </CTableDataCell>
                       </CTableRow>
                     ) : (
@@ -469,7 +469,7 @@ const Forces = () => {
                 )}
                 
                 <div className="text-muted small text-center mt-3">
-                  Mostrando {forces.length} de {totalItems} fuerzas
+                  Mostrando {forces.length} de {totalItems} Forces
                 </div>
               </>
             )}
@@ -485,7 +485,7 @@ const Forces = () => {
       >
         <CModalHeader>
           <CModalTitle>
-            {isEditMode ? 'Editar Fuerza' : 'Nueva Fuerza'}
+            {isEditMode ? 'Editar Force' : 'Nuevo Force'}
           </CModalTitle>
         </CModalHeader>
         <CModalBody>
@@ -582,7 +582,7 @@ const Forces = () => {
             </CCol>
 
             <CCol md={6}>
-              <CFormLabel>Tipo de Fuerza *</CFormLabel>
+              <CFormLabel>Tipo de Force *</CFormLabel>
               <CFormInput
                 name="tipoforce"
                 value={forceForm.tipoforce}
@@ -625,7 +625,7 @@ const Forces = () => {
                 Guardando...
               </>
             ) : (
-              isEditMode ? 'Actualizar Fuerza' : 'Crear Fuerza'
+              isEditMode ? 'Actualizar Force' : 'Crear Force'
             )}
           </CButton>
         </CModalFooter>

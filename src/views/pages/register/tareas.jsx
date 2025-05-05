@@ -169,6 +169,7 @@ const Tareas = () => {
     try {      
       // Cargar equipos
       const equiposResponse = await getEquipos(localStorage.getItem('token'));
+      
       setEquipos(equiposResponse.equipos || []);
     } catch (err) {
       console.error('Error al cargar equipos:', err);
@@ -1349,7 +1350,7 @@ const Tareas = () => {
                 <option value="">Sin equipo</option>
                 {equipos.map(equipo => (
                   <option key={equipo.idequipo} value={equipo.idequipo}>
-                    {equipo.nombreequipo}
+                    {equipo.descripcion_equipo}
                   </option>
                 ))}
               </CFormSelect>
