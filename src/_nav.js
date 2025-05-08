@@ -91,27 +91,38 @@ const processMenuTree = async (menuData) => {
   return resultItems;
 };
 
-const DynamicSidebarNav = async () => {
-  
-	try {
+const getDynamicSidebarNav = async () => {
+  try {
     const token = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
+    if (!token || !storedUser) return []
     
-    if (!token || !storedUser) {
-      
-      return [];
-    }
-		// Aquí hacemos la petición al backend para obtener el menú
-		const response = await getMenus(token);		
-		// Transformamos el JSON a la estructura de menú de CoreUI
-		const menuItems = await processMenuTree(response);	
-		return menuItems; 
-	} catch (err) {
-		console.error("Error al cargar el menú:", err)
-		return []
-	} 
+    const response = await getMenus(token)
+    return await processMenuTree(response)
+  } catch (err) {
+    console.error("Error al cargar el menú:", err)
+    return []
+  }
 }
 
-// Procesar el menú y exportarlo
-const navItems = await DynamicSidebarNav();
-export default navItems;
+export const fetchNavItems = () => async (dispatch) => {
+  try {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (!token || !storedUser) return;
+
+    const response = await getMenus(token);
+    const menuItems = await processMenuTree(response);
+    
+    dispatch({ 
+      type: 'SET_NAV_ITEMS',
+      navItems: menuItems
+    });
+  } catch (error) {
+    console.error("Error loading menu:", error);
+  }
+};
+
+const navigation = await getDynamicSidebarNav()
+
+export default navigation

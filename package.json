@@ -8,6 +8,7 @@
     "@coreui/react": "^5.5.0",
     "@coreui/react-chartjs": "^3.0.0",
     "@popperjs/core": "^2.11.8",
+    "@reduxjs/toolkit": "^2.8.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

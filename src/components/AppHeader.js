@@ -33,7 +33,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilMenu, cilAccountLogout, cilUser, cilLockLocked, cilUser as cilUserIcon } from '@coreui/icons'
 import usuarioDesconocido from '../assets/images/desconocido.png'
-
+import { fetchNavItems } from '../_nav'
 import { logIn } from '../services/usuarios.service'
 
 // URL de imágenes
@@ -172,11 +172,7 @@ const AppHeader = () => {
         setUserData(userData)
 
         // Actualizar store global con datos de usuario y ítems de menú
-        dispatch({ 
-          type: 'LOGIN_SUCCESS', 
-          userData: userData
-          // navItems se calculará automáticamente en el reducer
-        })
+        dispatch(fetchNavItems());
         
         // Cerrar modal
         setShowLoginModal(false)

@@ -7,10 +7,12 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
+  CNavItem,
+  CNavGroup,
+  CNavTitle,
 } from '@coreui/react'
 import { AppSidebarNav } from './AppSidebarNav'
 import logo from '../assets/images/favicon.png'
-//import navigation from '../_nav'
 
 const AppSidebar = () => {
   const dispatch = useDispatch()

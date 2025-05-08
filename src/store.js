@@ -1,4 +1,4 @@
-import { createStore } from 'redux'
+import { configureStore } from '@reduxjs/toolkit'
 import navigation from './_nav'
 import CIcon from '@coreui/icons-react';
 const { CNavItem } = require('@coreui/react')
@@ -8,7 +8,8 @@ const initialState = {
   sidebarUnfoldable: false,
   isAuthenticated: false,
   userData: null,
-  navItems: [] // Ítems de navegación vacíos por defecto
+  navItems: [], // Ítems de navegación vacíos por defecto
+  loadingMenu: false
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {
@@ -29,6 +30,11 @@ const changeState = (state = initialState, { type, ...rest }) => {
         userData: null,
         navItems: getNavItems(false, null) // Reiniciar a ítems públicos
       }
+    case 'SET_NAV_ITEMS':
+      return {
+        ...state,
+        navItems: rest.navItems
+    };
     default:
       return state
   }
@@ -41,8 +47,14 @@ const getNavItems = (isAuthenticated, userData) => {
     cilSpeedometer,
     
   } = require('@coreui/icons')
+
+  console.log('isAuthenticated', isAuthenticated)
+  console.log('userData', userData)
+  //console.log('navigation', navigation)
+  console.log('navigation.length', navigation.length)
   
   if (!isAuthenticated || !userData || navigation.length === 0) {
+    console.log('No hay navegación para el usuario')
     const publicItems = [
       {
         component: CNavItem,
@@ -66,5 +78,7 @@ const getNavItems = (isAuthenticated, userData) => {
   return authenticatedItems
 }
 
-const store = createStore(changeState)
+const store = configureStore({
+  reducer: changeState,
+})
 export default store
