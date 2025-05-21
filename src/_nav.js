@@ -1,8 +1,4 @@
-import React from 'react'
-import CIcon from '@coreui/icons-react';
 import { getMenus } from "./services/menu.service";
-import * as ICON_MAP from '@coreui/icons';
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react';
 
 // Función para procesar la estructura de menú jerárquico en formato plano
 const processMenuTree = async (menuData) => {
@@ -19,10 +15,10 @@ const processMenuTree = async (menuData) => {
   if (dashboard && dashboard.href === 'CNavItem' && dashboard.estatus === 1) {
     // Añadir el Dashboard como primer elemento
     resultItems.push({
-      component: CNavItem,
+      component: 'CNavItem',
       name: dashboard.name,
       to: dashboard.url,
-      icon: dashboard.icon ? <CIcon icon={ICON_MAP[dashboard.icon]} customClassName="nav-icon" /> : null,
+      icon: dashboard.icon || null,
       badge: dashboard.badge_text ? {
         color: dashboard.badge_variant || 'info',
         text: dashboard.badge_text
@@ -37,7 +33,7 @@ const processMenuTree = async (menuData) => {
       // Añadir el título de sección si es un CNavTitle
       if (section.href === 'CNavTitle' && section.estatus === 1) {
         resultItems.push({
-          component: CNavTitle,
+          component: 'CNavTitle',
           name: section.name
         });
         
@@ -49,10 +45,10 @@ const processMenuTree = async (menuData) => {
             // Si es un grupo, procesar con sus sub-elementos
             if (item.href === 'CNavGroup') {
               const navGroup = {
-                component: CNavGroup,
+                component: 'CNavGroup',
                 name: item.name,
                 to: item.url,
-                icon: item.icon ? <CIcon icon={ICON_MAP[item.icon]} customClassName="nav-icon" /> : null,
+                icon: item.icon || null,
                 items: []
               };
               
@@ -63,10 +59,11 @@ const processMenuTree = async (menuData) => {
                   
                   // Por defecto, asumimos que es un CNavItem si no se especifica href
                   navGroup.items.push({
-                    component: subItem.href === 'CNavGroup' ? CNavGroup : CNavItem,
+                    component: subItem.href === 'CNavGroup' ? 'CNavGroup' : 'CNavItem',
                     name: subItem.name,
                     to: subItem.url || '',
-                    icon: subItem.icon ? <CIcon icon={ICON_MAP[subItem.icon]} customClassName="nav-icon" /> : null
+                    icon: subItem.icon || null,
+                    
                   });
                 });
               }
@@ -76,10 +73,10 @@ const processMenuTree = async (menuData) => {
             // Si es un elemento simple
             else {
               resultItems.push({
-                component: CNavItem,
+                component: 'CNavItem',
                 name: item.name,
                 to: item.url || '',
-                icon: item.icon ? <CIcon icon={ICON_MAP[item.icon]} customClassName="nav-icon" /> : null
+                icon: item.icon || null,
               });
             }
           });
@@ -98,6 +95,7 @@ const getDynamicSidebarNav = async () => {
     if (!token || !storedUser) return []
     
     const response = await getMenus(token)
+    console.log("Menú cargado:", response)
     return await processMenuTree(response)
   } catch (err) {
     console.error("Error al cargar el menú:", err)

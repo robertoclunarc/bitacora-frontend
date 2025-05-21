@@ -7,9 +7,7 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
-  CNavItem,
-  CNavGroup,
-  CNavTitle,
+  
 } from '@coreui/react'
 import { AppSidebarNav } from './AppSidebarNav'
 import logo from '../assets/images/favicon.png'

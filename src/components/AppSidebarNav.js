@@ -4,13 +4,22 @@ import PropTypes from 'prop-types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar-react/dist/simplebar.min.css'
 import { CBadge, CNavLink, CSidebarNav } from '@coreui/react'
+import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import * as ICON_MAP from '@coreui/icons';
 
 export const AppSidebarNav = ({ items }) => {
+
+  const renderIcon = (iconName) => {
+    if (!iconName || !ICON_MAP[iconName]) return null;
+    return <CIcon icon={ICON_MAP[iconName]} customClassName="nav-icon" />;
+  };
+
   const navLink = (name, icon, badge, indent = false) => {
     return (
       <>
         {icon
-          ? icon
+          ? renderIcon(icon)
           : indent && (
               <span className="nav-icon">
                 <span className="nav-icon-bullet"></span>
@@ -28,7 +37,15 @@ export const AppSidebarNav = ({ items }) => {
 
   const navItem = (item, index, indent = false) => {
     const { component, name, badge, icon, ...rest } = item
-    const Component = component
+    let Component;
+    if (component === 'CNavTitle') {
+      Component = CNavTitle
+    }
+    else if (component === 'CNavGroup') {
+      Component = CNavGroup
+    } else {
+      Component = CNavItem
+    }
     return (
       <Component as="div" key={index}>
         {rest.to || rest.href ? (
@@ -48,7 +65,15 @@ export const AppSidebarNav = ({ items }) => {
 
   const navGroup = (item, index) => {
     const { component, name, icon, items, to, ...rest } = item
-    const Component = component
+    let Component;
+    if (component === 'CNavTitle') {
+      Component = CNavTitle
+    }
+    else if (component === 'CNavGroup') {
+      Component = CNavGroup
+    } else {
+      Component = CNavItem
+    }
     return (
       <Component compact as="div" key={index} toggler={navLink(name, icon)} {...rest}>
         {items?.map((item, index) =>

@@ -75,6 +75,7 @@ const AppHeader = () => {
       '/force/registros': 'Registros / Force',
       '/incidencias': 'Registros / Incidencias',
       '/tareas': 'Registros / Actividades',
+      '/historicos/bitacoras': 'Historicos / Bitacoras',
       // Añadir más mapeos según sea necesario
     }
     
@@ -204,21 +205,26 @@ const AppHeader = () => {
           <h3>BITÁCORA</h3>
         </CHeaderBrand>
         <CHeaderNav className="d-none d-md-flex me-auto">
-          <CNavItem>
-            <CNavLink to="/dashboard" component={NavLink}>
-              Dashboard
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink to="/bitacoras" component={NavLink}>
-              Bitácoras
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink to="/reuniones" component={NavLink}>
-              Reuniones
-            </CNavLink>
-          </CNavItem>
+          {isAuthenticated && (
+            // Opciones para usuario autenticado
+            <>
+              <CNavItem>
+                <CNavLink to="/dashboard" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }} component={NavLink}>
+                  Dashboard
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink to="/bitacoras" onClick={() => navigate('/bitacoras')} style={{ cursor: 'pointer' }} component={NavLink}>
+                  Bitácoras
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink to="/reuniones" onClick={() => navigate('/reuniones')} style={{ cursor: 'pointer' }} component={NavLink}>
+                  Reuniones
+                </CNavLink>
+              </CNavItem>
+            </>
+          )}
         </CHeaderNav>        
         <CHeaderNav className="ms-3">
           {/* Mostrar el nombre del usuario cuando está autenticado */}
@@ -246,18 +252,18 @@ const AppHeader = () => {
               {isAuthenticated ? (
                 // Opciones para usuario autenticado
                 <>
-                  <CDropdownItem onClick={() => navigate('/perfil')}>
+                  <CDropdownItem onClick={() => navigate('/perfil')} style={{ cursor: 'pointer' }}>
                     <CIcon icon={cilUser} className="me-2" />
                     Perfil
                   </CDropdownItem>
-                  <CDropdownItem onClick={handleLogout}>
+                  <CDropdownItem onClick={handleLogout} style={{ cursor: 'pointer' }}>
                     <CIcon icon={cilAccountLogout} className="me-2" />
                     Cerrar Sesión
                   </CDropdownItem>
                 </>
               ) : (
                 // Opción para usuario no autenticado
-                <CDropdownItem onClick={handleLoginClick}>
+                <CDropdownItem onClick={handleLoginClick} style={{ cursor: 'pointer' }}>
                   <CIcon icon={cilUser} className="me-2" />
                   Abrir Sesión
                 </CDropdownItem>

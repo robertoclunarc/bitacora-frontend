@@ -37,6 +37,9 @@ const SistemasForce = React.lazy(() => import('../views/force/sistemas'))
 const SenalesForce = React.lazy(() => import('../views/force/senales'))
 const ForceRegistros = React.lazy(() => import('../views/pages/register/forces'))
 
+//Hostoricos
+const HistoricosBitacoras = React.lazy(() => import('../views/pages/historicos/Historicos'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -55,7 +58,8 @@ const routes = [
   { path: '/carteleras', name: 'Gestión de Carteleras', element: Carteleras },
   { path: '/Incidencias', name: 'Gestión de Incidencias', element: Incidencias },
   { path: '/tareas', name: 'Gestión de Actividades', element: Actividades },
-  
+  // Historicos
+  { path: 'historicos/bitacoras', name: 'Histórico de Bitácoras', element: HistoricosBitacoras },
 ]
 
 export default routes

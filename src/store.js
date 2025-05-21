@@ -1,7 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
 import navigation from './_nav'
-import CIcon from '@coreui/icons-react';
-const { CNavItem } = require('@coreui/react')
 
 const initialState = {
   sidebarShow: true,
@@ -42,25 +40,18 @@ const changeState = (state = initialState, { type, ...rest }) => {
 
 // Función para obtener ítems de navegación según el estado de autenticación
 const getNavItems = (isAuthenticated, userData) => {
-  // Importar los iconos necesarios
-  const {
-    cilSpeedometer,
-    
-  } = require('@coreui/icons')
-
+  
   console.log('isAuthenticated', isAuthenticated)
-  console.log('userData', userData)
-  //console.log('navigation', navigation)
-  console.log('navigation.length', navigation.length)
+  console.log('userData', userData)  
   
   if (!isAuthenticated || !userData || navigation.length === 0) {
     console.log('No hay navegación para el usuario')
     const publicItems = [
       {
-        component: CNavItem,
+        component: 'CNavItem',
         name: 'Dashboard',
         to: '/dashboard',
-        icon:  <CIcon icon={cilSpeedometer} customClassName="nav-icon" /> ,
+        icon:  'cilSpeedometer',
         badge: {
           color: 'info',
           text: 'NEW',
