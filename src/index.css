@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* En tu archivo CSS principal */
+.page-item:not(.disabled) .page-link {
+  cursor: pointer !important;
+}
+
+.page-item.disabled .page-link {
+  cursor: default !important;
+}

@@ -59,7 +59,7 @@ const routes = [
   { path: '/Incidencias', name: 'Gestión de Incidencias', element: Incidencias },
   { path: '/tareas', name: 'Gestión de Actividades', element: Actividades },
   // Historicos
-  { path: 'historicos/bitacoras', name: 'Histórico de Bitácoras', element: HistoricosBitacoras },
+  { path: '/historicos/bitacoras', name: 'Histórico de Bitácoras', element: HistoricosBitacoras },
 ]
 
 export default routes
