@@ -167,13 +167,19 @@ const AppHeader = () => {
         const userData = response.user
         localStorage.setItem('token', response.token)
         localStorage.setItem('user', JSON.stringify(userData))
-        
+
         // Actualizar estado
         setIsAuthenticated(true)
         setUserData(userData)
 
-        // Actualizar store global con datos de usuario y ítems de menú
-        dispatch(fetchNavItems());
+        // Primero dispatch LOGIN_SUCCESS
+        dispatch({ 
+          type: 'LOGIN_SUCCESS', 
+          userData: userData 
+        });
+      
+        // Luego cargar los ítems de navegación
+        await dispatch(fetchNavItems());
         
         // Cerrar modal
         setShowLoginModal(false)

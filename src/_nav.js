@@ -88,7 +88,7 @@ const processMenuTree = async (menuData) => {
   return resultItems;
 };
 
-const getDynamicSidebarNav = async () => {
+/*const getDynamicSidebarNav = async () => {
   try {
     const token = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
@@ -101,26 +101,50 @@ const getDynamicSidebarNav = async () => {
     console.error("Error al cargar el menú:", err)
     return []
   }
-}
+}*/
 
 export const fetchNavItems = () => async (dispatch) => {
   try {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (!token || !storedUser) return;
+    if (!token || !storedUser) {
+      // Si no hay token o usuario, asegurarse de limpiar los ítems
+      dispatch({ type: 'SET_NAV_ITEMS', navItems: [] });
+      return;
+    }
 
+    // Verificar si ya hay ítems en localStorage
+    const storedNavItems = localStorage.getItem('navItems');
+    if (storedNavItems) {
+      dispatch({ 
+        type: 'SET_NAV_ITEMS',
+        navItems: JSON.parse(storedNavItems)
+      });
+    }
+
+    // Siempre intentar actualizar desde el servidor
     const response = await getMenus(token);
     const menuItems = await processMenuTree(response);
-    
-    dispatch({ 
-      type: 'SET_NAV_ITEMS',
-      navItems: menuItems
-    });
+
+    if (menuItems.length > 0) {
+      localStorage.setItem('navItems', JSON.stringify(menuItems));
+      dispatch({ 
+        type: 'SET_NAV_ITEMS',
+        navItems: menuItems
+      });
+    }
   } catch (error) {
     console.error("Error loading menu:", error);
+    // Si hay error, mantener los ítems almacenados si existen
+    const storedNavItems = localStorage.getItem('navItems');
+    if (storedNavItems) {
+      dispatch({ 
+        type: 'SET_NAV_ITEMS',
+        navItems: JSON.parse(storedNavItems)
+      });
+    }
   }
 };
 
-const navigation = await getDynamicSidebarNav()
-
-export default navigation
+/*const navigation = await getDynamicSidebarNav()
+export default navigation*/

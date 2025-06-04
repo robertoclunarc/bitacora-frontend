@@ -1,14 +1,26 @@
 import { configureStore } from '@reduxjs/toolkit'
-import navigation from './_nav'
+//import navigation from './_nav'
 
 const initialState = {
   sidebarShow: true,
   sidebarUnfoldable: false,
   isAuthenticated: false,
   userData: null,
-  navItems: [], // Ítems de navegación vacíos por defecto
+  navItems: JSON.parse(localStorage.getItem('navItems')) || [
+    {
+      component: 'CNavItem',
+      name: 'Dashboard',
+      to: '/dashboard',
+      icon: 'cilSpeedometer',
+      badge: {
+        color: 'info',
+        text: 'NEW',
+      },
+    }
+  ],
   loadingMenu: false
 }
+
 
 const changeState = (state = initialState, { type, ...rest }) => {
   switch (type) {
@@ -19,14 +31,15 @@ const changeState = (state = initialState, { type, ...rest }) => {
         ...state, 
         isAuthenticated: true, 
         userData: rest.userData,
-        navItems: rest.navItems || getNavItems(true, rest.userData) // Obtener ítems según el rol/nivel
+        /*navItems: rest.navItems || getNavItems(true, rest.userData) */// Obtener ítems según el rol/nivel
       }
     case 'LOGOUT':
+      localStorage.removeItem('navItems')
       return { 
         ...state, 
         isAuthenticated: false, 
         userData: null,
-        navItems: getNavItems(false, null) // Reiniciar a ítems públicos
+        navItems: initialState.navItems // Reiniciar a ítems públicos
       }
     case 'SET_NAV_ITEMS':
       return {
@@ -39,11 +52,11 @@ const changeState = (state = initialState, { type, ...rest }) => {
 }
 
 // Función para obtener ítems de navegación según el estado de autenticación
-const getNavItems = (isAuthenticated, userData) => {
+/*const getNavItems = (isAuthenticated, userData) => {
   
   console.log('isAuthenticated', isAuthenticated)
   console.log('userData', userData)  
-  
+  console.log('navigation', navigation)
   if (!isAuthenticated || !userData || navigation.length === 0) {
     console.log('No hay navegación para el usuario')
     const publicItems = [
@@ -67,7 +80,7 @@ const getNavItems = (isAuthenticated, userData) => {
   ]
   
   return authenticatedItems
-}
+}*/
 
 const store = configureStore({
   reducer: changeState,
